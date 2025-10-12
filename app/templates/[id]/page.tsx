@@ -1,15 +1,17 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useWorkout } from '@/hooks/useWorkout';
 import Link from 'next/link';
+import { Icons } from '@/components/Icons';
 
 export default function TemplateDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { currentTemplate, isLoading, fetchTemplate } = useTemplates();
+  const { currentTemplate, isLoading, fetchTemplate, deleteTemplate } = useTemplates();
   const { startWorkout, isLoading: starting } = useWorkout();
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -22,73 +24,167 @@ export default function TemplateDetailPage() {
     try {
       await startWorkout(currentTemplate.id);
       router.push('/workout');
-    } catch (error) {
-      alert('Failed to start workout. You may have an active workout.');
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to start workout';
+      alert(message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!currentTemplate) return;
+    if (confirm(`Are you sure you want to delete "${currentTemplate.name}"? This action cannot be undone.`)) {
+      setDeleting(true);
+      await deleteTemplate(currentTemplate.id);
+      router.push('/templates');
     }
   };
 
   if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-400">Loading template...</div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading template...</p>
+        </div>
       </div>
     );
   }
 
   if (!currentTemplate) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-400">Template not found</div>
+      <div className="card text-center py-16">
+        <Icons.Target className="w-20 h-20 text-gray-600 mx-auto mb-4" />
+        <h3 className="text-2xl font-bold text-white mb-2">Template not found</h3>
+        <p className="text-gray-400 mb-6">This template doesn't exist or has been deleted</p>
+        <Link href="/templates" className="btn-primary inline-block">
+          Back to Templates
+        </Link>
       </div>
     );
   }
 
+  const totalSets = currentTemplate.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+  const estimatedTime = totalSets * 3; // Rough estimate: 3 mins per set
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+        <div className="flex-1">
+          <Link
+            href="/templates"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition mb-4"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Templates
+          </Link>
+          
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
             {currentTemplate.name}
           </h1>
-          <p className="text-gray-400">{currentTemplate.description}</p>
+          
+          {currentTemplate.description && (
+            <p className="text-gray-400 text-lg">{currentTemplate.description}</p>
+          )}
+
+          {/* Stats */}
+          <div className="flex flex-wrap gap-4 mt-6">
+            <div className="flex items-center gap-2 bg-dark-300 px-4 py-2 rounded-xl">
+              <Icons.Dumbbell className="w-5 h-5 text-primary-500" />
+              <span className="text-white font-semibold">{currentTemplate.exercises.length} exercises</span>
+            </div>
+            <div className="flex items-center gap-2 bg-dark-300 px-4 py-2 rounded-xl">
+              <Icons.Target className="w-5 h-5 text-blue-500" />
+              <span className="text-white font-semibold">{totalSets} sets</span>
+            </div>
+            <div className="flex items-center gap-2 bg-dark-300 px-4 py-2 rounded-xl">
+              <Icons.Clock className="w-5 h-5 text-green-500" />
+              <span className="text-white font-semibold">~{estimatedTime} min</span>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={handleStartWorkout}
-          disabled={starting}
-          className="bg-primary hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-50"
-        >
-          {starting ? 'Starting...' : 'Start Workout'}
-        </button>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-3 lg:w-64">
+          <button
+            onClick={handleStartWorkout}
+            disabled={starting}
+            className="btn-primary w-full flex items-center justify-center gap-2"
+          >
+            {starting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Starting...
+              </>
+            ) : (
+              <>
+                <Icons.Lightning className="w-5 h-5" />
+                Start Workout
+              </>
+            )}
+          </button>
+          
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50"
+          >
+            {deleting ? 'Deleting...' : 'Delete Template'}
+          </button>
+        </div>
       </div>
 
+      {/* Exercises List */}
       <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Icons.Fire className="w-7 h-7 text-primary-500" />
+          Workout Plan
+        </h2>
+
         {currentTemplate.exercises.map((exercise, index) => (
-          <div key={exercise.id} className="bg-gray-800 p-6 rounded-lg">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-white">
-                  {index + 1}. {exercise.exercise?.name}
+          <div key={exercise.id} className="card">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="bg-primary-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0">
+                {index + 1}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {exercise.exercise?.name}
                 </h3>
                 {exercise.notes && (
-                  <p className="text-gray-400 mt-1">📝 {exercise.notes}</p>
+                  <div className="flex items-start gap-2 bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 mb-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-blue-400 text-sm">{exercise.notes}</p>
+                  </div>
                 )}
               </div>
             </div>
+
+            {/* Sets Table */}
             <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-4 px-4 py-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <span>Set</span>
+                <span className="text-center">Weight</span>
+                <span className="text-center">Reps</span>
+              </div>
               {exercise.sets.map((set) => (
                 <div
                   key={set.id}
-                  className="flex items-center justify-between bg-gray-700 p-3 rounded"
+                  className="grid grid-cols-3 gap-4 bg-dark-300 px-4 py-3 rounded-xl items-center hover:bg-dark-200 transition-colors"
                 >
-                  <span className="text-gray-300">Set {set.setNumber}</span>
-                  <div className="flex gap-6">
-                    <span className="text-white">
-                      {set.targetWeight} kg
-                    </span>
-                    <span className="text-white">
-                      {set.targetReps} reps
-                    </span>
-                  </div>
+                  <span className="text-white font-semibold">Set {set.setNumber}</span>
+                  <span className="text-center">
+                    <span className="text-primary-500 font-bold text-lg">{set.targetWeight}</span>
+                    <span className="text-gray-400 text-sm ml-1">kg</span>
+                  </span>
+                  <span className="text-center">
+                    <span className="text-primary-500 font-bold text-lg">{set.targetReps}</span>
+                    <span className="text-gray-400 text-sm ml-1">reps</span>
+                  </span>
                 </div>
               ))}
             </div>
@@ -96,13 +192,21 @@ export default function TemplateDetailPage() {
         ))}
       </div>
 
-      <div className="flex gap-4">
-        <Link
-          href="/templates"
-          className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition"
-        >
-          ← Back to Templates
-        </Link>
+      {/* Bottom Actions */}
+      <div className="card bg-gradient-to-r from-primary-600 to-orange-600">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-2xl font-bold text-white mb-2">Ready to crush it?</h3>
+            <p className="text-white/90">Start this workout and track your progress</p>
+          </div>
+          <button
+            onClick={handleStartWorkout}
+            disabled={starting}
+            className="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105 disabled:opacity-50 whitespace-nowrap"
+          >
+            {starting ? 'Starting...' : 'Start Workout Now'}
+          </button>
+        </div>
       </div>
     </div>
   );
