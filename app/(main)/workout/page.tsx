@@ -313,7 +313,7 @@ export default function WorkoutPage() {
                       
                       <div className="flex-1">
                         <h4 className="text-white font-bold text-lg mb-1">
-                          {exercise.exercise.name}
+                          {exercise?.exercise?.name}
                         </h4>
                         <div className="flex items-center gap-4 text-sm text-gray-400">
                           <span>{completedSets}/{totalSets} sets completed</span>

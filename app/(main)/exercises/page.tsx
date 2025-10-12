@@ -4,17 +4,17 @@ import { useExercises } from '@/hooks/useExercises';
 import { MuscleGroup } from '@/lib/types';
 import { Icons } from '@/components/Icons';
 
-const muscleGroupConfig: Record<MuscleGroup, { label: string; emoji: string; color: string }> = {
-  [MuscleGroup.CHEST]: { label: 'Chest', emoji: '💪', color: 'from-red-500 to-pink-500' },
-  [MuscleGroup.BACK]: { label: 'Back', emoji: '🔙', color: 'from-blue-500 to-cyan-500' },
-  [MuscleGroup.SHOULDERS]: { label: 'Shoulders', emoji: '🏋️', color: 'from-orange-500 to-yellow-500' },
-  [MuscleGroup.BICEPS]: { label: 'Biceps', emoji: '💪', color: 'from-purple-500 to-pink-500' },
-  [MuscleGroup.TRICEPS]: { label: 'Triceps', emoji: '💪', color: 'from-green-500 to-emerald-500' },
-  [MuscleGroup.LEGS]: { label: 'Legs', emoji: '🦵', color: 'from-indigo-500 to-purple-500' },
-  [MuscleGroup.GLUTES]: { label: 'Glutes', emoji: '🍑', color: 'from-pink-500 to-rose-500' },
-  [MuscleGroup.CORE]: { label: 'Core', emoji: '🔥', color: 'from-yellow-500 to-orange-500' },
-  [MuscleGroup.CARDIO]: { label: 'Cardio', emoji: '🏃', color: 'from-cyan-500 to-blue-500' },
-  [MuscleGroup.FULL_BODY]: { label: 'Full Body', emoji: '🤸', color: 'from-primary-500 to-orange-500' },
+const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> = {
+  [MuscleGroup.CHEST]: { label: 'Chest', color: 'from-red-500 to-pink-500' },
+  [MuscleGroup.BACK]: { label: 'Back', color: 'from-blue-500 to-cyan-500' },
+  [MuscleGroup.SHOULDERS]: { label: 'Shoulders', color: 'from-orange-500 to-yellow-500' },
+  [MuscleGroup.BICEPS]: { label: 'Biceps', color: 'from-purple-500 to-pink-500' },
+  [MuscleGroup.TRICEPS]: { label: 'Triceps', color: 'from-green-500 to-emerald-500' },
+  [MuscleGroup.LEGS]: { label: 'Legs', color: 'from-indigo-500 to-purple-500' },
+  [MuscleGroup.GLUTES]: { label: 'Glutes', color: 'from-pink-500 to-rose-500' },
+  [MuscleGroup.CORE]: { label: 'Core', color: 'from-yellow-500 to-orange-500' },
+  [MuscleGroup.CARDIO]: { label: 'Cardio', color: 'from-cyan-500 to-blue-500' },
+  [MuscleGroup.FULL_BODY]: { label: 'Full Body', color: 'from-primary-500 to-orange-500' },
 };
 
 export default function ExercisesPage() {
@@ -64,7 +64,7 @@ export default function ExercisesPage() {
             placeholder="Search exercises..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-field pl-12"
+            className="input-search-field"
           />
           <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -96,7 +96,6 @@ export default function ExercisesPage() {
                   : 'bg-dark-300 text-gray-400 hover:bg-dark-200 hover:text-white'
               }`}
             >
-              <span className="mr-2">{config.emoji}</span>
               {config.label}
             </button>
           ))}
@@ -139,39 +138,38 @@ export default function ExercisesPage() {
             return (
               <div
                 key={exercise.id}
-                className="card-hover group"
+                className="card-hover group rounded-2xl overflow-hidden border border-gray-800 hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-3xl">{config.emoji}</span>
-                      <h3 className="text-xl font-bold text-white group-hover:text-primary-500 transition-colors">
-                        {exercise.name}
-                      </h3>
-                    </div>
-                    <div className={`badge bg-gradient-to-r ${config.color} text-white border-0 mb-3`}>
-                      {config.label}
+                {/* GIF ili video na vrhu */}
+                {exercise.videoUrl && (
+                  <div className="relative w-full overflow-hidden">
+                    <img
+                      src={exercise.videoUrl}
+                      alt={exercise.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                )}
+
+                {/* Sadržaj kartice */}
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-bold text-white group-hover:text-primary-500 transition-colors">
+                          {exercise.name}
+                        </h3>
+                      </div>
+                      <div className={`badge bg-gradient-to-r ${config.color} text-white border-0 mb-3`}>
+                        {config.label}
+                      </div>
                     </div>
                   </div>
+
+                  <p className="text-gray-400 text-sm mb-2 line-clamp-2">
+                    {exercise.description || 'No description available'}
+                  </p>
                 </div>
-                
-                <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                  {exercise.description || 'No description available'}
-                </p>
-                
-                {exercise.videoUrl && (
-                  <a
-                    href={exercise.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-primary-500 hover:text-primary-400 font-semibold text-sm transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
-                    </svg>
-                    Watch Video
-                  </a>
-                )}
               </div>
             );
           })}

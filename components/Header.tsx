@@ -5,44 +5,39 @@ import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user, logout, checkAuth } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export default function Header() {
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
-  }, [user, router]);
-
-  if (!user) return null;
-
-  const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: <Icons.Fire className="w-5 h-5" /> },
-    { href: '/exercises', label: 'Exercises', icon: <Icons.Dumbbell className="w-5 h-5" /> },
-    { href: '/templates', label: 'Templates', icon: <Icons.Target className="w-5 h-5" /> },
-    { href: '/workout', label: 'Workout', icon: <Icons.Lightning className="w-5 h-5" /> },
-  ];
-
+      const router = useRouter();
+      const pathname = usePathname();
+      const { user, logout, checkAuth } = useAuth();
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    
+      useEffect(() => {
+        checkAuth();
+      }, [checkAuth]);
+    
+      useEffect(() => {
+        if (!user) {
+          router.push('/login');
+        }
+      }, [user, router]);
+    
+      if (!user) return null;
+    
+      const navItems = [
+        { href: '/dashboard', label: 'Dashboard', icon: <Icons.Fire className="w-5 h-5" /> },
+        { href: '/exercises', label: 'Exercises', icon: <Icons.Dumbbell className="w-5 h-5" /> },
+        { href: '/templates', label: 'Templates', icon: <Icons.Target className="w-5 h-5" /> },
+        { href: '/workout', label: 'Workout', icon: <Icons.Lightning className="w-5 h-5" /> },
+      ];
   return (
-    <div className="min-h-screen bg-dark bg-gym-pattern">
-      <nav className="glass border-b border-dark-200 sticky top-0 z-50 backdrop-blur-xl">
+    <nav className="glass border-b border-dark-200 sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-8">
               <Link href="/dashboard" className="flex items-center gap-2 group">
                 <Icons.Dumbbell className="w-8 h-8 text-primary-500 group-hover:rotate-12 transition-transform" />
-                <span className="text-2xl font-bold gradient-text">GymTracker</span>
+                <span className="text-2xl font-bold gradient-text">Gymbro</span>
               </Link>
               
               <div className="hidden md:flex space-x-1">
@@ -135,10 +130,5 @@ export default function DashboardLayout({
           </div>
         )}
       </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
-    </div>
-  );
+  )
 }
