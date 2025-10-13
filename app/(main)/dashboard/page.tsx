@@ -105,7 +105,7 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
-          <div key={idx} className="card-hover group">
+          <div key={idx} className="card-hover group py-4 px-8 rounded-2xl overflow-hidden border-gray-900 hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20">
             <div className={`${stat.bgColor} rounded-2xl p-4 mb-4 inline-block group-hover:scale-110 transition-transform`}>
               <div className={`text-transparent bg-gradient-to-r ${stat.color} bg-clip-text`}>
                 {stat.icon}

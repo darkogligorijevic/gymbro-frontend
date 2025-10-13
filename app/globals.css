@@ -103,7 +103,7 @@ body {
   @apply bg-gradient-to-br from-dark-300 to-dark-400 rounded-2xl p-6 shadow-xl border border-dark-200 hover:border-primary-500/50 transition-all duration-300;
 }
 .card-hover {
-  @apply cursor-pointer transform hover:shadow-2xl;
+  @apply cursor-pointer transform hover:shadow-2xl duration-300;
 }
 .input-field {
   @apply w-full px-4 py-3 rounded-xl bg-dark-300 text-white border-2 border-dark-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all duration-300;

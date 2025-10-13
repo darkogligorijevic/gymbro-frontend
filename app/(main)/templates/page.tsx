@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useTemplates } from '@/hooks/useTemplates';
+import { workoutApi } from '@/lib/api';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 
@@ -9,13 +10,71 @@ export default function TemplatesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchTemplates();
+    const loadTemplates = async () => {
+      try {
+        await fetchTemplates();
+      } catch (error: any) {
+        console.error('Failed to fetch templates:', error);
+        const errorMsg = error.response?.data?.message || error.message || 'Failed to load templates';
+        alert(`Error loading templates: ${errorMsg}`);
+      }
+    };
+    loadTemplates();
   }, []);
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
-      setDeletingId(id);
+    setDeletingId(id);
+    
+    try {
+      // Prvo proveri da li template ima workout sessions
+      const workouts = await workoutApi.getAll();
+      const hasWorkouts = workouts.data.some(w => w.workoutTemplateId === id);
+      
+      if (hasWorkouts) {
+        const confirmDelete = confirm(
+          `⚠️ WARNING: "${name}" has workout history!\n\n` +
+          `This template has been used in workout sessions. ` +
+          `Deleting it may affect your workout history.\n\n` +
+          `Are you ABSOLUTELY SURE you want to delete it?`
+        );
+        
+        if (!confirmDelete) {
+          setDeletingId(null);
+          return;
+        }
+      } else {
+        const confirmDelete = confirm(
+          `Are you sure you want to delete "${name}"?\n\n` +
+          `This action cannot be undone.`
+        );
+        
+        if (!confirmDelete) {
+          setDeletingId(null);
+          return;
+        }
+      }
+
+      // Pokušaj da obrišeš
       await deleteTemplate(id);
+      await fetchTemplates();
+      alert('✅ Template deleted successfully!');
+      
+    } catch (error: any) {
+      console.error('Delete failed:', error);
+      
+      // Prikaži specifičnu error poruku
+      let errorMsg = 'Failed to delete template.';
+      
+      if (error.response?.status === 500) {
+        errorMsg = '❌ Cannot delete template!\n\n' +
+          'This template is being used by workout sessions. ' +
+          'You need to delete those workout sessions first, or contact support.';
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      }
+      
+      alert(errorMsg);
+    } finally {
       setDeletingId(null);
     }
   };
@@ -71,7 +130,7 @@ export default function TemplatesPage() {
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="card-hover group relative"
+                className="card-hover group relative border border-gray-900 py-6 px-4 rounded-2xl overflow-hidden hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20"
               >
                 {/* Template Content */}
                 <div className="mb-4">
@@ -122,6 +181,13 @@ export default function TemplatesPage() {
                     className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold text-center transition-all transform hover:scale-105"
                   >
                     View Details
+                  </Link>
+                  <Link
+                    href={`/templates/${template.id}/edit`}
+                    className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-4 py-3 rounded-xl transition-all"
+                    title="Edit template"
+                  >
+                    <Icons.Edit className="w-5 h-5" />
                   </Link>
                   <button
                     onClick={() => handleDelete(template.id, template.name)}

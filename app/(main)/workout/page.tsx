@@ -113,7 +113,7 @@ export default function WorkoutPage() {
   const progress = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="space-y-8">
       <h1 className="text-4xl md:text-5xl font-bold text-white flex items-center gap-3">
         <Icons.Lightning className="w-10 h-10 text-primary-500" />
         Workout Session

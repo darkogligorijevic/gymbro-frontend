@@ -54,7 +54,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
             <Icons.Dumbbell className="w-12 h-12 text-primary-500 group-hover:rotate-12 transition-transform" />
-            <span className="text-4xl font-bold gradient-text">GymTracker</span>
+            <span className="text-4xl font-bold gradient-text">Gymbro</span>
           </Link>
           <p className="text-gray-400 mt-2">Start your fitness journey today!</p>
         </div>

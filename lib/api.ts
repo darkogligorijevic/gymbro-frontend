@@ -16,13 +16,44 @@ const api = axios.create({
 });
 
 // Interceptor za dodavanje tokena
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('No token found in localStorage');
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Request interceptor error:', error);
+    return Promise.reject(error);
   }
-  return config;
-});
+);
+
+// Response interceptor za bolji error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+
+    // Ako je 401, možda je token istekao
+    if (error.response?.status === 401) {
+      console.error('Unauthorized - token may be expired');
+      // Opciono: redirect na login
+      // window.location.href = '/login';
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 // Auth API
 export const authApi = {

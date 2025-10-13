@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useWorkout } from '@/hooks/useWorkout';
+import { workoutApi } from '@/lib/api';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 
@@ -32,10 +33,56 @@ export default function TemplateDetailPage() {
 
   const handleDelete = async () => {
     if (!currentTemplate) return;
-    if (confirm(`Are you sure you want to delete "${currentTemplate.name}"? This action cannot be undone.`)) {
-      setDeleting(true);
+    setDeleting(true);
+    
+    try {
+      // Prvo proveri da li template ima workout sessions
+      const workouts = await workoutApi.getAll();
+      const hasWorkouts = workouts.data.some(w => w.workoutTemplateId === currentTemplate.id);
+      
+      if (hasWorkouts) {
+        const confirmDelete = confirm(
+          `⚠️ WARNING: "${currentTemplate.name}" has workout history!\n\n` +
+          `This template has been used in workout sessions. ` +
+          `Deleting it may affect your workout history.\n\n` +
+          `Are you ABSOLUTELY SURE you want to delete it?`
+        );
+        
+        if (!confirmDelete) {
+          setDeleting(false);
+          return;
+        }
+      } else {
+        const confirmDelete = confirm(
+          `Are you sure you want to delete "${currentTemplate.name}"?\n\n` +
+          `This action cannot be undone.`
+        );
+        
+        if (!confirmDelete) {
+          setDeleting(false);
+          return;
+        }
+      }
+
       await deleteTemplate(currentTemplate.id);
+      alert('✅ Template deleted successfully!');
       router.push('/templates');
+      
+    } catch (error: any) {
+      console.error('Delete failed:', error);
+      
+      let errorMsg = 'Failed to delete template.';
+      
+      if (error.response?.status === 500) {
+        errorMsg = '❌ Cannot delete template!\n\n' +
+          'This template is being used by workout sessions. ' +
+          'You need to delete those workout sessions first, or contact support.';
+      } else if (error.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      }
+      
+      alert(errorMsg);
+      setDeleting(false);
     }
   };
 
@@ -126,6 +173,14 @@ export default function TemplateDetailPage() {
             )}
           </button>
           
+          <Link
+            href={`/templates/${currentTemplate.id}/edit`}
+            className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all text-center"
+          >
+            <Icons.Edit className="w-5 h-5 inline mr-2" />
+            Edit Template
+          </Link>
+
           <button
             onClick={handleDelete}
             disabled={deleting}

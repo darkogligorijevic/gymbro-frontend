@@ -50,7 +50,7 @@ export default function HomePage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Icons.Dumbbell className="w-10 h-10 text-primary-500" />
-              <span className="text-3xl font-bold gradient-text">GymTracker</span>
+              <span className="text-3xl font-bold gradient-text">Gymbro</span>
             </div>
             <div className="flex gap-4">
               <Link href="/login" className="btn-secondary">
@@ -118,8 +118,8 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, idx) => (
-              <div key={idx} className="card-hover group">
-                <div className="text-primary-500 mb-4 group-hover:scale-110 transition-transform">
+              <div key={idx} className="card-hover group px-6 py-8 rounded-2xl overflow-hidden border border-gray-800 hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20">
+                <div className="text-primary-500 mb-4 transition-transform">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
@@ -146,7 +146,7 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="container mx-auto px-6 py-8 border-t border-dark-200">
           <div className="text-center text-gray-400">
-            <p>© 2025 GymTracker. Built for athletes, by athletes. 💪</p>
+            <p>© 2025 Gymbro. Built for athletes, by codilio.</p>
           </div>
         </footer>
       </div>
