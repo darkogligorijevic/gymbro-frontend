@@ -24,7 +24,7 @@ export default function TemplateDetailPage() {
     if (!currentTemplate) return;
     try {
       await startWorkout(currentTemplate.id);
-      router.push('/workout');
+      router.push('/workouts');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to start workout';
       alert(message);

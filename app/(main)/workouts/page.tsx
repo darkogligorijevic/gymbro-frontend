@@ -380,11 +380,12 @@ export default function WorkoutPage() {
                 {workoutHistory.slice(0, 10).map((workout) => (
                   <div
                     key={workout.id}
-                    className="card hover:border-primary-500/50 transition-all"
+                    onClick={() => router.push(`/workouts/${workout.id}`)}
+                    className="card hover:border-primary-500/50 transition-all cursor-pointer group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="bg-green-500/10 p-3 rounded-xl">
+                        <div className="bg-green-500/10 p-3 rounded-xl group-hover:bg-green-500/20 transition-colors">
                           <Icons.Check className="w-6 h-6 text-green-500" />
                         </div>
                         <div>
@@ -403,12 +404,15 @@ export default function WorkoutPage() {
                           </div>
                         </div>
                       </div>
-                      {workout.isWorkoutFinished && (
-                        <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
-                          <Icons.Check className="w-4 h-4 mr-1" />
-                          Completed
-                        </div>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {workout.isWorkoutFinished && (
+                          <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
+                            <Icons.Check className="w-4 h-4 mr-1" />
+                            Completed
+                          </div>
+                        )}
+                        <Icons.ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                      </div>
                     </div>
                   </div>
                 ))}

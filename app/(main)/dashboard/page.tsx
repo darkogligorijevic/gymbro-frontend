@@ -4,10 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useTemplates } from '@/hooks/useTemplates';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { Icons } from '@/components/Icons';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { activeWorkout, workoutHistory, getActiveWorkout, fetchHistory } = useWorkout();
   const { templates, fetchTemplates } = useTemplates();
@@ -93,7 +95,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <Link
-              href="/workout"
+              href="/workouts"
               className="btn-primary bg-white text-green-600 hover:bg-gray-100 whitespace-nowrap"
             >
               Continue Workout →
@@ -154,7 +156,7 @@ export default function DashboardPage() {
             Recent Workouts
           </h2>
           <Link
-            href="/workout"
+            href="/workouts"
             className="text-primary-500 hover:text-primary-400 transition flex items-center gap-2 font-semibold"
           >
             View All
@@ -175,7 +177,8 @@ export default function DashboardPage() {
             {workoutHistory.slice(0, 5).map((workout) => (
               <div
                 key={workout.id}
-                className="card hover:border-primary-500/50 transition-all group"
+                onClick={() => router.push(`/workouts/${workout.id}`)}
+                className="card hover:border-primary-500/50 transition-all group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -198,12 +201,15 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                  {workout.isWorkoutFinished && (
-                    <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
-                      <Icons.Check className="w-4 h-4 mr-1" />
-                      Completed
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {workout.isWorkoutFinished && (
+                      <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
+                        <Icons.Check className="w-4 h-4 mr-1" />
+                        Completed
+                      </div>
+                    )}
+                    <Icons.ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                  </div>
                 </div>
               </div>
             ))}

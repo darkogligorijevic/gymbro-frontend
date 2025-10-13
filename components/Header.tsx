@@ -28,7 +28,7 @@ export default function Header() {
         { href: '/dashboard', label: 'Dashboard', icon: <Icons.Fire className="w-5 h-5" /> },
         { href: '/exercises', label: 'Exercises', icon: <Icons.Dumbbell className="w-5 h-5" /> },
         { href: '/templates', label: 'Templates', icon: <Icons.Target className="w-5 h-5" /> },
-        { href: '/workout', label: 'Workout', icon: <Icons.Lightning className="w-5 h-5" /> },
+        { href: '/workouts', label: 'Workouts', icon: <Icons.Lightning className="w-5 h-5" /> },
       ];
   return (
     <nav className="glass border-b border-dark-200 sticky top-0 z-50 backdrop-blur-xl">

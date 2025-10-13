@@ -18,7 +18,7 @@ const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> =
 };
 
 export default function ExercisesPage() {
-  const { exercises, isLoading, fetchExercises, seedExercises } = useExercises();
+  const { exercises, isLoading, fetchExercises } = useExercises();
   const [filter, setFilter] = useState<MuscleGroup | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -26,10 +26,6 @@ export default function ExercisesPage() {
     fetchExercises(filter);
   }, [filter]);
 
-  const handleSeed = async () => {
-    await seedExercises();
-    fetchExercises(filter);
-  };
 
   const filteredExercises = exercises.filter(exercise =>
     exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -48,13 +44,6 @@ export default function ExercisesPage() {
             </h1>
             <p className="text-gray-400 text-lg">Master your form, build your strength</p>
           </div>
-          <button
-            onClick={handleSeed}
-            className="btn-primary"
-          >
-            <Icons.Plus className="w-5 h-5 inline mr-2" />
-            Seed Exercises
-          </button>
         </div>
 
         {/* Search Bar */}
@@ -123,12 +112,6 @@ export default function ExercisesPage() {
           <p className="text-gray-400 mb-6">
             {searchQuery ? 'Try adjusting your search' : 'Add some exercises to get started'}
           </p>
-          {!searchQuery && (
-            <button onClick={handleSeed} className="btn-primary">
-              <Icons.Plus className="w-5 h-5 inline mr-2" />
-              Add Sample Exercises
-            </button>
-          )}
         </div>
       ) : (
         /* Exercise Grid */
