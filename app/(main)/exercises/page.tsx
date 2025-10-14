@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useExercises } from '@/hooks/useExercises';
 import { MuscleGroup } from '@/lib/types';
 import { Icons } from '@/components/Icons';
@@ -18,19 +19,57 @@ const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> =
 };
 
 export default function ExercisesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { exercises, isLoading, fetchExercises } = useExercises();
   const [filter, setFilter] = useState<MuscleGroup | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Selection mode states
+  const isSelectionMode = searchParams.get('mode') === 'select';
+  const returnPath = searchParams.get('return') || '/templates/new';
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
+  const [selectionOrder, setSelectionOrder] = useState<string[]>([]); // Prati redosled
 
   useEffect(() => {
     fetchExercises(filter);
   }, [filter]);
 
-
   const filteredExercises = exercises.filter(exercise =>
     exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     exercise.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const toggleExerciseSelection = (exerciseId: string) => {
+    setSelectedExerciseIds(prev => {
+      const isCurrentlySelected = prev.includes(exerciseId);
+      
+      if (isCurrentlySelected) {
+        // Ukloni iz oba
+        setSelectionOrder(order => order.filter(id => id !== exerciseId));
+        return prev.filter(id => id !== exerciseId);
+      } else {
+        // Dodaj u oba, order čuva redosled
+        setSelectionOrder(order => [...order, exerciseId]);
+        return [...prev, exerciseId];
+      }
+    });
+  };
+
+  const handleConfirmSelection = () => {
+    if (selectedExerciseIds.length === 0) {
+      alert('Please select at least one exercise');
+      return;
+    }
+    
+    // Enkoduj IDs u URL
+    const idsParam = selectedExerciseIds.join(',');
+    router.push(`${returnPath}?selected=${idsParam}`);
+  };
+
+  const handleCancelSelection = () => {
+    router.push(returnPath);
+  };
 
   return (
     <div className="space-y-8">
@@ -40,9 +79,13 @@ export default function ExercisesPage() {
           <div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
               <Icons.Dumbbell className="w-10 h-10 text-primary-500" />
-              Exercise Library
+              {isSelectionMode ? 'Select Exercises' : 'Exercise Library'}
             </h1>
-            <p className="text-gray-400 text-lg">Master your form, build your strength</p>
+            <p className="text-gray-400 text-lg">
+              {isSelectionMode 
+                ? `Select exercises to add to your template (${selectedExerciseIds.length} selected)` 
+                : 'Master your form, build your strength'}
+            </p>
           </div>
         </div>
 
@@ -60,6 +103,36 @@ export default function ExercisesPage() {
           </svg>
         </div>
       </div>
+
+      {/* Selection Mode Actions */}
+      {isSelectionMode && (
+        <div className="card bg-gradient-to-r from-primary-600 to-orange-600 sticky top-20 z-40">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-1">
+                {selectedExerciseIds.length} exercise{selectedExerciseIds.length !== 1 ? 's' : ''} selected
+              </h3>
+              <p className="text-white/90 text-sm">Click exercises to select, then confirm to add them</p>
+            </div>
+            <div className="flex gap-3 w-full md:w-auto">
+              <button
+                onClick={handleCancelSelection}
+                className="flex-1 md:flex-none bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSelection}
+                disabled={selectedExerciseIds.length === 0}
+                className="flex-1 md:flex-none bg-white text-primary-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Icons.Check className="w-5 h-5 inline mr-2" />
+                Confirm Selection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div>
@@ -118,11 +191,37 @@ export default function ExercisesPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredExercises.map((exercise) => {
             const config = muscleGroupConfig[exercise.muscleGroup];
+            const isSelected = selectedExerciseIds.includes(exercise.id);
+            
             return (
               <div
                 key={exercise.id}
-                className="card-hover group rounded-2xl overflow-hidden border border-gray-800 hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20"
+                onClick={() => isSelectionMode && toggleExerciseSelection(exercise.id)}
+                className={`card-hover group rounded-2xl overflow-hidden border transition-all shadow-md ${
+                  isSelectionMode 
+                    ? `cursor-pointer ${
+                        isSelected 
+                          ? 'border-primary-500 bg-primary-500/10 shadow-primary-500/30' 
+                          : 'border-gray-800 hover:border-primary-500/50'
+                      }`
+                    : 'border-gray-800 hover:border-primary-500'
+                } hover:shadow-primary-500/20`}
               >
+                {/* Selection Checkbox - samo u selection mode */}
+                {isSelectionMode && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all ${
+                      isSelected 
+                        ? 'bg-primary-500 border-primary-500' 
+                        : 'bg-dark-400 border-gray-600 group-hover:border-primary-500'
+                    }`}>
+                      {isSelected && (
+                        <Icons.Check className="w-5 h-5 text-white" />
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* GIF ili video na vrhu */}
                 {exercise.videoUrl && (
                   <div className="relative w-full overflow-hidden">
@@ -139,7 +238,9 @@ export default function ExercisesPage() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-bold text-white group-hover:text-primary-500 transition-colors">
+                        <h3 className={`text-xl font-bold transition-colors ${
+                          isSelected ? 'text-primary-500' : 'text-white group-hover:text-primary-500'
+                        }`}>
                           {exercise.name}
                         </h3>
                       </div>

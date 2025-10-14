@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useExercises } from '@/hooks/useExercises';
 import { Icons } from '@/components/Icons';
@@ -15,6 +15,7 @@ interface ExerciseForm {
 export default function EditTemplatePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const { currentTemplate, updateTemplate, fetchTemplate, isLoading: saving } = useTemplates();
   const { exercises, fetchExercises } = useExercises();
   const [name, setName] = useState('');
@@ -48,6 +49,33 @@ export default function EditTemplatePage() {
     }
   }, [currentTemplate]);
 
+  // Auto-dodaj vežbe iz URL parametara
+  useEffect(() => {
+    const selectedIds = searchParams.get('selected');
+    if (selectedIds && exercises.length > 0 && !loading) {
+      // Prvo očisti URL da spreči ponovljeno izvršavanje
+      router.replace(`/templates/${params.id}/edit`, { scroll: false });
+      
+      const ids = selectedIds.split(',');
+      const newExerciseForms: ExerciseForm[] = ids
+        .filter(id => exercises.some(ex => ex.id === id))
+        .map(id => ({
+          exerciseId: id,
+          notes: '',
+          sets: [{ targetWeight: 0, targetReps: 8 }],
+        }));
+      
+      if (newExerciseForms.length > 0) {
+        setExercisesForms(prev => {
+          // Proveri da li su već dodati (dodatna zaštita)
+          const existingIds = prev.map(p => p.exerciseId);
+          const filtered = newExerciseForms.filter(n => !existingIds.includes(n.exerciseId));
+          return [...prev, ...filtered];
+        });
+      }
+    }
+  }, [searchParams, exercises, loading, router, params.id]);
+
   const addExercise = () => {
     setExercisesForms([
       ...exercisesForms,
@@ -57,6 +85,20 @@ export default function EditTemplatePage() {
         sets: [{ targetWeight: 0, targetReps: 8 }],
       },
     ]);
+  };
+
+  const addExerciseAfter = (index: number) => {
+    const updated = [...exercisesForms];
+    updated.splice(index + 1, 0, {
+      exerciseId: '',
+      notes: '',
+      sets: [{ targetWeight: 0, targetReps: 8 }],
+    });
+    setExercisesForms(updated);
+  };
+
+  const handleBulkAddExercises = () => {
+    router.push(`/exercises?mode=select&return=/templates/${params.id}/edit`);
   };
 
   const removeExercise = (index: number) => {
@@ -231,165 +273,199 @@ export default function EditTemplatePage() {
                 <span className="text-gray-400 text-lg">({exercisesForms.length})</span>
               )}
             </h2>
-            <button
-              type="button"
-              onClick={addExercise}
-              className="btn-primary"
-            >
-              <Icons.Plus className="w-5 h-5 inline mr-2" />
-              Add Exercise
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleBulkAddExercises}
+                className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-4 py-2 rounded-xl font-semibold transition-all"
+              >
+                <Icons.Plus className="w-5 h-5 inline mr-2" />
+                Browse & Select
+              </button>
+              <button
+                type="button"
+                onClick={addExercise}
+                className="btn-primary"
+              >
+                <Icons.Plus className="w-5 h-5 inline mr-2" />
+                Add Single Exercise
+              </button>
+            </div>
           </div>
 
           {exercisesForms.length === 0 ? (
             <div className="card text-center py-12">
               <Icons.Dumbbell className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 mb-4">No exercises added yet</p>
-              <button
-                type="button"
-                onClick={addExercise}
-                className="btn-primary inline-block"
-              >
-                Add Your First Exercise
-              </button>
+              <p className="text-gray-400 mb-6">No exercises added yet</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={handleBulkAddExercises}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/50"
+                >
+                  <Icons.Target className="w-5 h-5 inline mr-2" />
+                  Browse & Select Multiple
+                </button>
+                <button
+                  type="button"
+                  onClick={addExercise}
+                  className="btn-primary inline-block"
+                >
+                  Add Single Exercise
+                </button>
+              </div>
             </div>
           ) : (
             exercisesForms.map((exerciseForm, exIndex) => {
               const selectedExercise = exercises.find(e => e.id === exerciseForm.exerciseId);
               
               return (
-                <div key={exIndex} className="card">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold">
-                        {exIndex + 1}
+                <div key={exIndex}>
+                  <div className="card">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold">
+                          {exIndex + 1}
+                        </div>
+                        <h3 className="text-xl font-bold text-white">
+                          {selectedExercise?.name || 'Select Exercise'}
+                        </h3>
                       </div>
-                      <h3 className="text-xl font-bold text-white">
-                        {selectedExercise?.name || 'Select Exercise'}
-                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => removeExercise(exIndex)}
+                        className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
+                        title="Remove exercise"
+                      >
+                        <Icons.Trash className="w-5 h-5" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeExercise(exIndex)}
-                      className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
-                      title="Remove exercise"
-                    >
-                      <Icons.Trash className="w-5 h-5" />
-                    </button>
+
+                    <div className="space-y-4">
+                      {/* Exercise Selection */}
+                      <div>
+                        <label className="block text-gray-300 font-semibold mb-2">
+                          Select Exercise <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={exerciseForm.exerciseId}
+                          onChange={(e) =>
+                            updateExercise(exIndex, 'exerciseId', e.target.value)
+                          }
+                          className="input-field"
+                          required
+                        >
+                          <option value="">Choose an exercise...</option>
+                          {exercises.map((ex) => (
+                            <option key={ex.id} value={ex.id}>
+                              {ex.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Notes */}
+                      <div>
+                        <label className="block text-gray-300 font-semibold mb-2">
+                          Notes (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={exerciseForm.notes}
+                          onChange={(e) =>
+                            updateExercise(exIndex, 'notes', e.target.value)
+                          }
+                          className="input-field"
+                          placeholder="e.g., Rest 90 seconds, Focus on form"
+                        />
+                      </div>
+
+                      {/* Sets */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="text-gray-300 font-semibold">Sets</label>
+                          <button
+                            type="button"
+                            onClick={() => addSet(exIndex)}
+                            className="text-primary-500 hover:text-primary-400 font-semibold text-sm flex items-center gap-1"
+                          >
+                            <Icons.Plus className="w-4 h-4" />
+                            Add Set
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {exerciseForm.sets.map((set, setIndex) => (
+                            <div
+                              key={setIndex}
+                              className="grid grid-cols-[auto_1fr_1fr_auto] gap-3 items-center bg-dark-300 p-3 rounded-xl"
+                            >
+                              <span className="text-gray-400 font-semibold w-16">
+                                Set {setIndex + 1}
+                              </span>
+                              
+                              <div>
+                                <input
+                                  type="number"
+                                  value={set.targetWeight || ''}
+                                  onChange={(e) =>
+                                    updateSet(
+                                      exIndex,
+                                      setIndex,
+                                      'targetWeight',
+                                      parseFloat(e.target.value) || 0
+                                    )
+                                  }
+                                  className="input-field py-2"
+                                  placeholder="Weight (kg)"
+                                  step="0.5"
+                                  min="0"
+                                />
+                              </div>
+                              
+                              <div>
+                                <input
+                                  type="number"
+                                  value={set.targetReps || ''}
+                                  onChange={(e) =>
+                                    updateSet(
+                                      exIndex,
+                                      setIndex,
+                                      'targetReps',
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  className="input-field py-2"
+                                  placeholder="Reps"
+                                  min="1"
+                                />
+                              </div>
+                              
+                              <button
+                                type="button"
+                                onClick={() => removeSet(exIndex, setIndex)}
+                                className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
+                                disabled={exerciseForm.sets.length === 1}
+                              >
+                                <Icons.Trash className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-4">
-                    {/* Exercise Selection */}
-                    <div>
-                      <label className="block text-gray-300 font-semibold mb-2">
-                        Select Exercise <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        value={exerciseForm.exerciseId}
-                        onChange={(e) =>
-                          updateExercise(exIndex, 'exerciseId', e.target.value)
-                        }
-                        className="input-field"
-                        required
-                      >
-                        <option value="">Choose an exercise...</option>
-                        {exercises.map((ex) => (
-                          <option key={ex.id} value={ex.id}>
-                            {ex.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Notes */}
-                    <div>
-                      <label className="block text-gray-300 font-semibold mb-2">
-                        Notes (optional)
-                      </label>
-                      <input
-                        type="text"
-                        value={exerciseForm.notes}
-                        onChange={(e) =>
-                          updateExercise(exIndex, 'notes', e.target.value)
-                        }
-                        className="input-field"
-                        placeholder="e.g., Rest 90 seconds, Focus on form"
-                      />
-                    </div>
-
-                    {/* Sets */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-gray-300 font-semibold">Sets</label>
-                        <button
-                          type="button"
-                          onClick={() => addSet(exIndex)}
-                          className="text-primary-500 hover:text-primary-400 font-semibold text-sm flex items-center gap-1"
-                        >
-                          <Icons.Plus className="w-4 h-4" />
-                          Add Set
-                        </button>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        {exerciseForm.sets.map((set, setIndex) => (
-                          <div
-                            key={setIndex}
-                            className="grid grid-cols-[auto_1fr_1fr_auto] gap-3 items-center bg-dark-300 p-3 rounded-xl"
-                          >
-                            <span className="text-gray-400 font-semibold w-16">
-                              Set {setIndex + 1}
-                            </span>
-                            
-                            <div>
-                              <input
-                                type="number"
-                                value={set.targetWeight || ''}
-                                onChange={(e) =>
-                                  updateSet(
-                                    exIndex,
-                                    setIndex,
-                                    'targetWeight',
-                                    parseFloat(e.target.value) || 0
-                                  )
-                                }
-                                className="input-field py-2"
-                                placeholder="Weight (kg)"
-                                step="0.5"
-                                min="0"
-                              />
-                            </div>
-                            
-                            <div>
-                              <input
-                                type="number"
-                                value={set.targetReps || ''}
-                                onChange={(e) =>
-                                  updateSet(
-                                    exIndex,
-                                    setIndex,
-                                    'targetReps',
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                className="input-field py-2"
-                                placeholder="Reps"
-                                min="1"
-                              />
-                            </div>
-                            
-                            <button
-                              type="button"
-                              onClick={() => removeSet(exIndex, setIndex)}
-                              className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
-                              disabled={exerciseForm.sets.length === 1}
-                            >
-                              <Icons.Trash className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  {/* Add Exercise Button After This One */}
+                  <div className="flex justify-center -my-2 relative z-10">
+                    <button
+                      type="button"
+                      onClick={() => addExerciseAfter(exIndex)}
+                      className="bg-dark-300 hover:bg-primary-500 text-gray-400 hover:text-white p-2 rounded-full transition-all shadow-lg hover:shadow-primary-500/50 group"
+                      title="Add exercise below"
+                    >
+                      <Icons.Plus className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
               );

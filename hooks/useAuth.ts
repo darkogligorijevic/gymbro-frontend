@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { authApi } from '@/lib/api';
 import type { User } from '@/lib/types';
 
@@ -7,6 +7,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  _hasHydrated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     email: string;
@@ -17,6 +18,7 @@ interface AuthState {
   }) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -25,6 +27,11 @@ export const useAuth = create<AuthState>()(
       user: null,
       token: null,
       isLoading: false,
+      _hasHydrated: false,
+
+      setHasHydrated: (state) => {
+        set({ _hasHydrated: state });
+      },
 
       login: async (email, password) => {
         set({ isLoading: true });
@@ -71,6 +78,10 @@ export const useAuth = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
