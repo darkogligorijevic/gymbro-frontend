@@ -196,7 +196,13 @@ export default function ExercisesPage() {
             return (
               <div
                 key={exercise.id}
-                onClick={() => isSelectionMode && toggleExerciseSelection(exercise.id)}
+                onClick={() => {
+                  if (isSelectionMode) {
+                    toggleExerciseSelection(exercise.id);
+                  } else {
+                    router.push(`/exercises/${exercise.id}`);
+                  }
+                }}
                 className={`card-hover group rounded-2xl overflow-hidden border transition-all shadow-md ${
                   isSelectionMode 
                     ? `cursor-pointer ${
@@ -204,7 +210,7 @@ export default function ExercisesPage() {
                           ? 'border-primary-500 bg-primary-500/10 shadow-primary-500/30' 
                           : 'border-gray-800 hover:border-primary-500/50'
                       }`
-                    : 'border-gray-800 hover:border-primary-500'
+                    : 'border-gray-800 hover:border-primary-500 cursor-pointer'
                 } hover:shadow-primary-500/20`}
               >
                 {/* Selection Checkbox - samo u selection mode */}
