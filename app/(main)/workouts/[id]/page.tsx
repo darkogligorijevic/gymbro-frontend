@@ -42,6 +42,13 @@ export default function WorkoutDetailPage() {
     });
   };
 
+  const getSessionName = () => {
+    if (!workout) return '';
+    const templateName = workout.workoutTemplate?.name || 'Workout';
+    const date = format(new Date(workout.clockIn), 'MMM dd, yyyy');
+    return `${templateName} - ${date}`;
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -108,10 +115,10 @@ export default function WorkoutDetailPage() {
             )}
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-white">
-                {workout.workoutTemplate?.name || 'Custom Workout'}
+                {getSessionName()}
               </h2>
               <p className="text-white/80 text-lg mt-1">
-                {format(new Date(workout.clockIn), 'EEEE, MMMM dd, yyyy • h:mm a')}
+                {format(new Date(workout.clockIn), 'EEEE, h:mm a')}
               </p>
             </div>
           </div>
@@ -264,8 +271,8 @@ export default function WorkoutDetailPage() {
                             : 'bg-dark-300 border-2 border-dark-200'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-6">
+                        <div className="flex items-center justify-between flex-wrap gap-4">
+                          <div className="flex items-center gap-6 flex-wrap">
                             <span className={`font-bold text-lg ${
                               set.isCompleted ? 'text-green-500' : 'text-gray-400'
                             }`}>
@@ -291,13 +298,22 @@ export default function WorkoutDetailPage() {
                             </div>
                           </div>
 
-                          {set.isCompleted && set.actualReps && (
-                            <div className="flex items-center gap-2">
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-green-500">
-                                  {set.actualReps}
+                          {set.isCompleted && (
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <div className="text-right">
+                                  <div className="text-2xl font-bold text-green-500">
+                                    {set.actualWeight || set.targetWeight}
+                                  </div>
+                                  <div className="text-xs text-gray-400">kg (actual)</div>
                                 </div>
-                                <div className="text-xs text-gray-400">actual reps</div>
+                                <div className="text-gray-500">×</div>
+                                <div className="text-right">
+                                  <div className="text-2xl font-bold text-green-500">
+                                    {set.actualReps}
+                                  </div>
+                                  <div className="text-xs text-gray-400">reps (actual)</div>
+                                </div>
                               </div>
                               <Icons.Check className="w-6 h-6 text-green-500" />
                             </div>

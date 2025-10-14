@@ -10,7 +10,10 @@ interface WorkoutState {
   error: string | null;
   startWorkout: (templateId: string) => Promise<void>;
   getActiveWorkout: () => Promise<void>;
-  completeSet: (sessionId: string, setId: string, reps: number) => Promise<void>;
+  completeSet: (sessionId: string, setId: string, reps: number, weight?: number) => Promise<void>;
+  addSet: (sessionId: string, exerciseId: string, weight: number, reps: number) => Promise<void>;
+  skipExercise: (sessionId: string, exerciseId: string) => Promise<void>;
+  resumeExercise: (sessionId: string, exerciseId: string) => Promise<void>;
   finishWorkout: (sessionId: string) => Promise<void>;
   fetchHistory: () => Promise<void>;
 }
@@ -46,10 +49,43 @@ export const useWorkout = create<WorkoutState>((set, get) => ({
     }
   },
 
-  completeSet: async (sessionId: string, setId: string, reps: number) => {
+  completeSet: async (sessionId: string, setId: string, reps: number, weight?: number) => {
     set({ isLoading: true });
     try {
-      const response = await workoutApi.completeSet(sessionId, setId, reps);
+      const response = await workoutApi.completeSet(sessionId, setId, reps, weight);
+      set({ activeWorkout: response.data, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+      throw error;
+    }
+  },
+
+  addSet: async (sessionId: string, exerciseId: string, weight: number, reps: number) => {
+    set({ isLoading: true });
+    try {
+      const response = await workoutApi.addSet(sessionId, exerciseId, weight, reps);
+      set({ activeWorkout: response.data, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+      throw error;
+    }
+  },
+
+  skipExercise: async (sessionId: string, exerciseId: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await workoutApi.skipExercise(sessionId, exerciseId);
+      set({ activeWorkout: response.data, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+      throw error;
+    }
+  },
+
+  resumeExercise: async (sessionId: string, exerciseId: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await workoutApi.resumeExercise(sessionId, exerciseId);
       set({ activeWorkout: response.data, isLoading: false });
     } catch (error: any) {
       set({ error: error.message, isLoading: false });

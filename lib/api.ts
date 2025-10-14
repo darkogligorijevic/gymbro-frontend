@@ -15,7 +15,6 @@ const api = axios.create({
   },
 });
 
-// Interceptor za dodavanje tokena
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -32,7 +31,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor za bolji error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -44,18 +42,14 @@ api.interceptors.response.use(
       message: error.message,
     });
 
-    // Ako je 401, možda je token istekao
     if (error.response?.status === 401) {
       console.error('Unauthorized - token may be expired');
-      // Opciono: redirect na login
-      // window.location.href = '/login';
     }
 
     return Promise.reject(error);
   }
 );
 
-// Auth API
 export const authApi = {
   register: (data: {
     email: string;
@@ -71,7 +65,6 @@ export const authApi = {
   getProfile: () => api.get('/auth/profile'),
 };
 
-// Exercises API
 export const exercisesApi = {
   getAll: (muscleGroup?: string) =>
     api.get<Exercise[]>('/exercises', { params: { muscleGroup } }),
@@ -88,7 +81,6 @@ export const exercisesApi = {
   seed: () => api.post('/exercises/seed'),
 };
 
-// Templates API
 export const templatesApi = {
   getAll: () => api.get<WorkoutTemplate[]>('/workout-templates'),
   
@@ -102,7 +94,6 @@ export const templatesApi = {
   delete: (id: string) => api.delete(`/workout-templates/${id}`),
 };
 
-// Workout Sessions API
 export const workoutApi = {
   start: (workoutTemplateId: string) =>
     api.post<WorkoutSession>('/workout-sessions/start', { workoutTemplateId }),
@@ -113,11 +104,25 @@ export const workoutApi = {
   
   getOne: (id: string) => api.get<WorkoutSession>(`/workout-sessions/${id}`),
   
-  completeSet: (sessionId: string, setId: string, actualReps: number) =>
+  completeSet: (sessionId: string, setId: string, actualReps: number, actualWeight?: number) =>
     api.patch<WorkoutSession>(`/workout-sessions/${sessionId}/complete-set`, {
       setId,
       actualReps,
+      actualWeight,
     }),
+  
+  addSet: (sessionId: string, exerciseId: string, targetWeight: number, targetReps: number) =>
+    api.post<WorkoutSession>(`/workout-sessions/${sessionId}/add-set`, {
+      exerciseId,
+      targetWeight,
+      targetReps,
+    }),
+  
+  skipExercise: (sessionId: string, exerciseId: string) =>
+    api.post<WorkoutSession>(`/workout-sessions/${sessionId}/skip-exercise/${exerciseId}`),
+  
+  resumeExercise: (sessionId: string, exerciseId: string) =>
+    api.post<WorkoutSession>(`/workout-sessions/${sessionId}/resume-exercise/${exerciseId}`),
   
   finish: (sessionId: string) =>
     api.post<WorkoutSession>(`/workout-sessions/${sessionId}/finish`),

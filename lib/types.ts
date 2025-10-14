@@ -53,6 +53,7 @@ export interface SessionSet {
   setNumber: number;
   targetWeight: number;
   targetReps: number;
+  actualWeight?: number;
   actualReps?: number;
   isCompleted: boolean;
 }

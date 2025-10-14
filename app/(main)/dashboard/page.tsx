@@ -51,6 +51,12 @@ export default function DashboardPage() {
     },
   ];
 
+  const getSessionName = (workout: any) => {
+    const templateName = workout.workoutTemplate?.name || 'Workout';
+    const date = format(new Date(workout.clockIn), 'MMM dd, yyyy');
+    return `${templateName} - ${date}`;
+  };
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -88,7 +94,7 @@ export default function DashboardPage() {
                 <span className="text-white/90 font-semibold">ACTIVE WORKOUT</span>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                {activeWorkout.workoutTemplate?.name || 'Custom Workout'}
+                {getSessionName(activeWorkout)}
               </h2>
               <p className="text-white/80">
                 Started {format(new Date(activeWorkout.clockIn), 'h:mm a')}
@@ -187,12 +193,12 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <h3 className="text-white font-bold text-lg">
-                        {workout.workoutTemplate?.name || 'Custom Workout'}
+                        {getSessionName(workout)}
                       </h3>
                       <div className="flex items-center gap-4 text-sm text-gray-400 mt-1">
                         <span className="flex items-center gap-1">
-                          <Icons.Calendar className="w-4 h-4" />
-                          {format(new Date(workout.clockIn), 'MMM dd, yyyy')}
+                          <Icons.Clock className="w-4 h-4" />
+                          {format(new Date(workout.clockIn), 'h:mm a')}
                         </span>
                         <span className="flex items-center gap-1">
                           <Icons.Clock className="w-4 h-4" />
