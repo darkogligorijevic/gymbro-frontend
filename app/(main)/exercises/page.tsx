@@ -41,17 +41,17 @@ export default function ExercisesPage() {
   );
 
   const toggleExerciseSelection = (exerciseId: string) => {
-    setSelectedExerciseIds(prev => {
+    setSelectionOrder(prev => {
       const isCurrentlySelected = prev.includes(exerciseId);
       
       if (isCurrentlySelected) {
-        // Ukloni iz oba
-        setSelectionOrder(order => order.filter(id => id !== exerciseId));
-        return prev.filter(id => id !== exerciseId);
+        const newOrder = prev.filter(id => id !== exerciseId);
+        setSelectedExerciseIds(newOrder);
+        return newOrder;
       } else {
-        // Dodaj u oba, order čuva redosled
-        setSelectionOrder(order => [...order, exerciseId]);
-        return [...prev, exerciseId];
+        const newOrder = [...prev, exerciseId];
+        setSelectedExerciseIds(newOrder);
+        return newOrder;
       }
     });
   };
@@ -62,8 +62,7 @@ export default function ExercisesPage() {
       return;
     }
     
-    // Enkoduj IDs u URL
-    const idsParam = selectedExerciseIds.join(',');
+    const idsParam = selectionOrder.join(',');
     router.push(`${returnPath}?selected=${idsParam}`);
   };
 

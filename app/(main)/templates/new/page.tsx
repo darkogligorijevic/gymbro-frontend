@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useExercises } from '@/hooks/useExercises';
@@ -21,36 +21,48 @@ export default function NewTemplatePage() {
   const [description, setDescription] = useState('');
   const [exercisesForms, setExercisesForms] = useState<ExerciseForm[]>([]);
   const [error, setError] = useState('');
+  const hasProcessedSelection = useRef(false);
 
   useEffect(() => {
     fetchExercises();
-  }, []);
+  }, [fetchExercises]);
 
   // Auto-dodaj vežbe iz URL parametara
   useEffect(() => {
     const selectedIds = searchParams.get('selected');
-    if (selectedIds && exercises.length > 0) {
-      // Prvo očisti URL da spreči ponovljeno izvršavanje
-      router.replace('/templates/new', { scroll: false });
-      
-      const ids = selectedIds.split(',');
-      const newExerciseForms: ExerciseForm[] = ids
-        .filter(id => exercises.some(ex => ex.id === id))
-        .map(id => ({
-          exerciseId: id,
-          notes: '',
-          sets: [{ targetWeight: 0, targetReps: 8 }],
-        }));
-      
-      if (newExerciseForms.length > 0) {
-        setExercisesForms(prev => {
-          // Proveri da li su već dodati (dodatna zaštita)
-          const existingIds = prev.map(p => p.exerciseId);
-          const filtered = newExerciseForms.filter(n => !existingIds.includes(n.exerciseId));
-          return [...prev, ...filtered];
-        });
-      }
+    
+    if (!selectedIds || hasProcessedSelection.current) {
+      return;
     }
+    
+    const ids = selectedIds.split(',');
+    const uniqueIds = [...new Set(ids)]; // Ukloni duplikate
+    
+    // Proveri koliko vežbi možeš naći
+    const foundCount = uniqueIds.filter(id => exercises.some(ex => ex.id === id)).length;
+    
+    // Ako nisi našao sve, čekaj još
+    if (foundCount < uniqueIds.length && exercises.length < 80) {
+      return;
+    }
+    
+    // Označi odmah da je u procesu obrade
+    hasProcessedSelection.current = true;
+    
+    const newExerciseForms: ExerciseForm[] = uniqueIds
+      .filter(id => exercises.some(ex => ex.id === id))
+      .map(id => ({
+        exerciseId: id,
+        notes: '',
+        sets: [{ targetWeight: 0, targetReps: 8 }],
+      }));
+    
+    if (newExerciseForms.length > 0) {
+      setExercisesForms(newExerciseForms);
+    }
+    
+    // Očisti URL
+    router.replace('/templates/new', { scroll: false });
   }, [searchParams, exercises, router]);
 
   const addExercise = () => {

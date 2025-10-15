@@ -70,7 +70,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8">
       {/* Profile Header */}
-      <div className="card relative overflow-hidden">
+      <div className="rounded-3xl relative overflow-hidden p-8 md:p-12 shadow-2xl">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-purple-600/20"></div>
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">

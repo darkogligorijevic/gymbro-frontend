@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useExercises } from '@/hooks/useExercises';
@@ -23,6 +23,7 @@ export default function EditTemplatePage() {
   const [exercisesForms, setExercisesForms] = useState<ExerciseForm[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const hasProcessedSelection = useRef(false);
 
   useEffect(() => {
     fetchExercises();
@@ -49,30 +50,37 @@ export default function EditTemplatePage() {
     }
   }, [currentTemplate]);
 
-  // Auto-dodaj vežbe iz URL parametara
+  // Auto-dodaj vežbe iz URL parametara - SA ZAŠTITOM OD DUPLIKATA
   useEffect(() => {
     const selectedIds = searchParams.get('selected');
-    if (selectedIds && exercises.length > 0 && !loading) {
-      // Prvo očisti URL da spreči ponovljeno izvršavanje
-      router.replace(`/templates/${params.id}/edit`, { scroll: false });
+    
+    // Ako nema parametra ili je već obrađeno ili još učitava template, izađi
+    if (!selectedIds || hasProcessedSelection.current || loading) {
+      return;
+    }
+    
+    if (exercises.length > 0) {
+      // Označi odmah da je u procesu obrade
+      hasProcessedSelection.current = true;
       
       const ids = selectedIds.split(',');
-      const newExerciseForms: ExerciseForm[] = ids
-        .filter(id => exercises.some(ex => ex.id === id))
-        .map(id => ({
+      
+      // Proveri da li su već dodati
+      const existingIds = exercisesForms.map(f => f.exerciseId);
+      const newIds = ids.filter(id => !existingIds.includes(id) && exercises.some(ex => ex.id === id));
+      
+      if (newIds.length > 0) {
+        const newExerciseForms: ExerciseForm[] = newIds.map(id => ({
           exerciseId: id,
           notes: '',
           sets: [{ targetWeight: 0, targetReps: 8 }],
         }));
-      
-      if (newExerciseForms.length > 0) {
-        setExercisesForms(prev => {
-          // Proveri da li su već dodati (dodatna zaštita)
-          const existingIds = prev.map(p => p.exerciseId);
-          const filtered = newExerciseForms.filter(n => !existingIds.includes(n.exerciseId));
-          return [...prev, ...filtered];
-        });
+        
+        setExercisesForms(prev => [...prev, ...newExerciseForms]);
       }
+      
+      // Očisti URL
+      router.replace(`/templates/${params.id}/edit`, { scroll: false });
     }
   }, [searchParams, exercises, loading, router, params.id]);
 
