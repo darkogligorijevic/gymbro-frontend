@@ -3,7 +3,9 @@ import type {
   AuthResponse, 
   Exercise, 
   WorkoutTemplate, 
-  WorkoutSession 
+  WorkoutSession,
+  User,
+  UserProfile,
 } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -20,8 +22,6 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.warn('No token found in localStorage');
     }
     return config;
   },
@@ -63,6 +63,30 @@ export const authApi = {
     api.post<AuthResponse>('/auth/login', data),
   
   getProfile: () => api.get('/auth/profile'),
+};
+
+export const usersApi = {
+  search: (query: string) => api.get<User[]>(`/users/search?q=${query}`),
+  
+  getProfile: (id: string) => api.get<UserProfile>(`/users/${id}/profile`),
+  
+  updateProfile: (id: string, data: Partial<User>) =>
+    api.patch<User>(`/users/${id}`, data),
+  
+  uploadAvatar: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<User>(`/users/${id}/avatar`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  
+  changePassword: (id: string, oldPassword: string, newPassword: string) =>
+    api.patch(`/users/${id}/password`, { oldPassword, newPassword }),
+  
+  deleteAccount: (id: string) => api.delete(`/users/${id}`),
 };
 
 export const exercisesApi = {

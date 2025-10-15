@@ -1,11 +1,11 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useTemplates } from '@/hooks/useTemplates';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { Icons } from '@/components/Icons';
 
 export default function DashboardPage() {
@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { activeWorkout, workoutHistory, getActiveWorkout, fetchHistory } = useWorkout();
   const { templates, fetchTemplates } = useTemplates();
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   useEffect(() => {
     getActiveWorkout();
@@ -26,6 +27,113 @@ export default function DashboardPage() {
     const diff = now.getTime() - date.getTime();
     return diff < 7 * 24 * 60 * 60 * 1000;
   }).length;
+
+  // Funkcija za pronalaženje PRova
+  const personalRecords = useMemo(() => {
+    const prMap = new Map<string, { weight: number; reps: number; date: string; sessionId: string }>();
+    
+    workoutHistory.forEach((session) => {
+      session.exercises.forEach((exercise) => {
+        exercise.sets.forEach((set) => {
+          if (set.isCompleted && set.actualWeight) {
+            const key = exercise.exercise.name;
+            const current = prMap.get(key);
+            
+            // Računamo "strength score" (weight * reps) za poređenje
+            const currentScore = set.actualWeight * (set.actualReps || 0);
+            const recordScore = current ? current.weight * current.reps : 0;
+            
+            if (!current || currentScore > recordScore) {
+              prMap.set(key, {
+                weight: set.actualWeight,
+                reps: set.actualReps || 0,
+                date: session.clockIn,
+                sessionId: session.id
+              });
+            }
+          }
+        });
+      });
+    });
+    
+    return Array.from(prMap.entries())
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => (b.weight * b.reps) - (a.weight * a.reps))
+      .slice(0, 3);
+  }, [workoutHistory]);
+
+  // Najčešće vežbe
+  const mostFrequentExercises = useMemo(() => {
+    const exerciseCount = new Map<string, { count: number; name: string }>();
+    
+    workoutHistory.forEach((session) => {
+      session.exercises.forEach((exercise) => {
+        const name = exercise.exercise.name;
+        const current = exerciseCount.get(exercise.exerciseId);
+        
+        if (current) {
+          current.count++;
+        } else {
+          exerciseCount.set(exercise.exerciseId, { count: 1, name });
+        }
+      });
+    });
+    
+    return Array.from(exerciseCount.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [workoutHistory]);
+
+  // Workouts per week (poslednjih 8 nedelja)
+  const weeklyWorkouts = useMemo(() => {
+    const weeks: { week: string; count: number; volume: number }[] = [];
+    const now = new Date();
+    
+    for (let i = 7; i >= 0; i--) {
+      const weekStart = startOfWeek(subMonths(now, 0));
+      weekStart.setDate(weekStart.getDate() - (i * 7));
+      const weekEnd = endOfWeek(weekStart);
+      
+      const workoutsInWeek = workoutHistory.filter((w) => {
+        const date = new Date(w.clockIn);
+        return date >= weekStart && date <= weekEnd;
+      });
+      
+      // Računamo volume (total weight lifted)
+      const volume = workoutsInWeek.reduce((sum, workout) => {
+        const workoutVolume = workout.exercises.reduce((exSum, ex) => {
+          return exSum + ex.sets.reduce((setSum, set) => {
+            return setSum + (set.actualWeight || 0) * (set.actualReps || 0);
+          }, 0);
+        }, 0);
+        return sum + workoutVolume;
+      }, 0);
+      
+      weeks.push({
+        week: format(weekStart, 'MMM dd'),
+        count: workoutsInWeek.length,
+        volume: Math.round(volume)
+      });
+    }
+    
+    return weeks;
+  }, [workoutHistory]);
+
+  // Kalendar podataka
+  const calendarData = useMemo(() => {
+    const start = startOfMonth(selectedMonth);
+    const end = endOfMonth(selectedMonth);
+    const days = eachDayOfInterval({ start, end });
+    
+    return days.map((day) => {
+      const workout = workoutHistory.find((w) => isSameDay(new Date(w.clockIn), day));
+      return {
+        date: day,
+        workout,
+        hasWorkout: !!workout
+      };
+    });
+  }, [workoutHistory, selectedMonth]);
 
   const stats = [
     {
@@ -57,6 +165,8 @@ export default function DashboardPage() {
     return `${templateName} - ${date}`;
   };
 
+  const maxWeeklyCount = Math.max(...weeklyWorkouts.map(w => w.count), 1);
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -66,7 +176,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3 mb-4">
             <Icons.Fire className="w-10 h-10 text-white animate-bounce-slow" />
             <h1 className="text-4xl md:text-5xl font-bold text-white text-shadow">
-              Welcome back, {user?.firstName || user?.username}!
+              Welcome, {user?.firstName || user?.username}!
             </h1>
           </div>
           <p className="text-white/90 text-lg md:text-xl mb-6">
@@ -123,6 +233,215 @@ export default function DashboardPage() {
             <p className="text-5xl font-bold text-white">{stat.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Personal Records & Most Frequent Exercises */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Personal Records */}
+        <div className="card">
+          <div className="flex items-center gap-3 mb-6">
+            <Icons.Trophy className="w-8 h-8 text-yellow-500" />
+            <h2 className="text-2xl font-bold text-white">Personal Records</h2>
+          </div>
+          
+          {personalRecords.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400">No PRs yet. Start lifting! 💪</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {personalRecords.map((pr, idx) => (
+                <div
+                  key={pr.name}
+                  onClick={() => router.push(`/workouts/${pr.sessionId}`)}
+                  className="bg-dark-300 hover:bg-dark-200 p-4 rounded-xl transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-white font-bold text-lg group-hover:text-primary-500 transition-colors">
+                        {pr.name}
+                      </h3>
+                      <p className="text-gray-400 text-sm mt-1">
+                        {format(new Date(pr.date), 'MMM dd, yyyy')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-primary-500">
+                        {pr.weight} kg
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        {pr.reps} reps
+                      </div>
+                    </div>
+                  </div>
+                  {idx === 0 && (
+                    <div className="mt-2 inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold">
+                      <Icons.Trophy className="w-3 h-3" />
+                      TOP PR
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Most Frequent Exercises */}
+        <div className="card">
+          <div className="flex items-center gap-3 mb-6">
+            <Icons.Fire className="w-8 h-8 text-orange-500" />
+            <h2 className="text-2xl font-bold text-white">Most Frequent</h2>
+          </div>
+          
+          {mostFrequentExercises.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400">No exercises yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {mostFrequentExercises.map((exercise, idx) => (
+                <div
+                  key={exercise.name}
+                  className="bg-dark-300 p-4 rounded-xl"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center font-bold text-primary-500">
+                        {idx + 1}
+                      </div>
+                      <span className="text-white font-semibold">
+                        {exercise.name}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-white">
+                        {exercise.count}
+                      </div>
+                      <div className="text-gray-400 text-xs">
+                        sessions
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Activity Calendar */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Icons.Calendar className="w-8 h-8 text-primary-500" />
+            <h2 className="text-2xl font-bold text-white">Activity Calendar</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
+              className="p-2 hover:bg-dark-300 rounded-lg transition"
+            >
+              <Icons.ArrowLeft className="w-5 h-5 text-gray-400" />
+            </button>
+            <span className="text-white font-semibold min-w-32 text-center">
+              {format(selectedMonth, 'MMMM yyyy')}
+            </span>
+            <button
+              onClick={() => setSelectedMonth(new Date())}
+              className="px-3 py-1 bg-primary-500/10 text-primary-500 rounded-lg text-sm font-medium hover:bg-primary-500/20 transition"
+            >
+              Today
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div key={day} className="text-center text-gray-400 text-sm font-semibold py-2">
+              {day}
+            </div>
+          ))}
+          
+          {/* Padding za prvi dan meseca */}
+          {Array.from({ length: startOfMonth(selectedMonth).getDay() }).map((_, idx) => (
+            <div key={`empty-${idx}`} />
+          ))}
+          
+          {calendarData.map(({ date, workout, hasWorkout }) => {
+            const isToday = isSameDay(date, new Date());
+            
+            return (
+              <div
+                key={date.toISOString()}
+                onClick={() => workout && router.push(`/workouts/${workout.id}`)}
+                className={`
+                  aspect-square rounded-lg p-2 transition-all
+                  ${hasWorkout 
+                    ? 'bg-green-500/20 hover:bg-green-500/30 cursor-pointer border border-green-500/30' 
+                    : 'bg-dark-300 hover:bg-dark-200'
+                  }
+                  ${isToday ? 'ring-2 ring-primary-500' : ''}
+                `}
+              >
+                <div className="text-white text-sm font-semibold">
+                  {format(date, 'd')}
+                </div>
+                {hasWorkout && workout && (
+                  <div className="mt-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mx-auto" />
+                    <div className="text-xs text-green-400 text-center mt-1">
+                      {workout.durationMinutes}m
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-4 mt-6 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-500/20 border border-green-500/30" />
+            <span className="text-gray-400">Workout completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-dark-300" />
+            <span className="text-gray-400">Rest day</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Workouts Per Week Chart */}
+      <div className="card">
+        <div className="flex items-center gap-3 mb-6">
+          <Icons.Target className="w-8 h-8 text-blue-500" />
+          <h2 className="text-2xl font-bold text-white">Weekly Progress</h2>
+        </div>
+
+        <div className="space-y-4">
+          {weeklyWorkouts.map((week) => (
+            <div key={week.week}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gray-400 text-sm font-medium">{week.week}</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-white font-bold">{week.count} workouts</span>
+                  <span className="text-gray-400 text-sm">{week.volume.toLocaleString()} kg</span>
+                </div>
+              </div>
+              <div className="relative h-8 bg-dark-300 rounded-lg overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 to-orange-500 rounded-lg transition-all"
+                  style={{ width: `${(week.count / maxWeeklyCount) * 100}%` }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold z-10">
+                    {week.count > 0 && `${week.count}x`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Quick Actions */}

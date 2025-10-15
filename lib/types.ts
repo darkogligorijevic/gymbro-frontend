@@ -88,9 +88,51 @@ export interface User {
   username: string;
   firstName?: string;
   lastName?: string;
+  avatarUrl?: string;
+  createdAt?: string;
 }
 
 export interface AuthResponse {
   access_token: string;
   user: User;
+}
+
+export interface PersonalRecord {
+  exerciseName: string;
+  weight: number;
+  date: Date;
+}
+
+export interface FavoriteExercise {
+  exerciseName: string;
+  exerciseId: string;
+  count: number;
+  muscleGroup: string;
+}
+
+export interface RecentWorkout {
+  id: string;
+  date: string;
+  templateName: string;
+  duration?: number;
+  isCompleted: boolean;
+}
+
+export interface UserProfile {
+  user: {
+    id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+    avatarUrl?: string;
+    createdAt: string;
+  };
+  stats: {
+    totalWorkouts: number;
+    completedWorkouts: number;
+    thisWeekWorkouts: number;
+    topPRs: PersonalRecord[];
+    favoriteExercises: FavoriteExercise[];
+  };
+  recentWorkouts: RecentWorkout[];
 }

@@ -48,11 +48,11 @@ export default function HomePage() {
       <div className="relative z-10">
         <nav className="container mx-auto px-6 py-8">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <Icons.Dumbbell className="w-10 h-10 text-primary-500" />
+            <Link href={'/'} className="flex items-center gap-3">
+              <Icons.Lightning className="w-10 h-10 text-primary-500" />
               <span className="text-3xl font-bold gradient-text">Gymbro</span>
-            </div>
-            <div className="flex gap-4">
+            </Link>
+            <div className=" hidden sm:flex gap-4">
               <Link href="/login" className="btn-secondary">
                 Login
               </Link>

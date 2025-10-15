@@ -33,7 +33,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <Icons.Dumbbell className="w-12 h-12 text-primary-500 group-hover:rotate-12 transition-transform" />
+            <Icons.Lightning className="w-12 h-12 text-primary-500 group-hover:rotate-12 transition-transform" />
             <span className="text-4xl font-bold gradient-text">Gymbro</span>
           </Link>
           <p className="text-gray-400 mt-2">Welcome back, athlete!</p>
@@ -127,7 +127,7 @@ export default function LoginPage() {
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+        <div className="mt-8 grid md:grid-cols-3 gap-4 text-center">
           <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200">
             <Icons.Fire className="w-6 h-6 text-primary-500 mx-auto mb-2" />
             <div className="text-white font-bold">Track</div>
