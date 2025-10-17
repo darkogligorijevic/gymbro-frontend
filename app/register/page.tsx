@@ -199,7 +199,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Benefits */}
-        <div className="mt-8 space-y-3">
+        {/* <div className="mt-8 space-y-3">
           <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200 flex items-center gap-3">
             <div className="bg-primary-500/10 p-2 rounded-lg">
               <Icons.Check className="w-5 h-5 text-primary-500" />
@@ -218,7 +218,7 @@ export default function RegisterPage() {
             </div>
             <span className="text-gray-300">Monitor your progress</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

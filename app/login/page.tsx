@@ -127,7 +127,7 @@ export default function LoginPage() {
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-8 grid md:grid-cols-3 gap-4 text-center">
+        {/* <div className="mt-8 grid md:grid-cols-3 gap-4 text-center">
           <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200">
             <Icons.Fire className="w-6 h-6 text-primary-500 mx-auto mb-2" />
             <div className="text-white font-bold">Track</div>
@@ -143,7 +143,7 @@ export default function LoginPage() {
             <div className="text-white font-bold">Build</div>
             <div className="text-gray-400 text-xs">Your Strength</div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

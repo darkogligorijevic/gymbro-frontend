@@ -221,7 +221,7 @@ export default function DashboardPage() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 gap-6 justify-center text-center">
         {stats.map((stat, idx) => (
           <div key={idx} className="card-hover group py-4 px-8 rounded-2xl overflow-hidden border-gray-900 hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20">
             <div className={`${stat.bgColor} rounded-2xl p-4 mb-4 inline-block group-hover:scale-110 transition-transform`}>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
             <Icons.Calendar className="w-8 h-8 text-primary-500" />
             <h2 className="text-sm md:text-2xl font-bold text-white">Activity Calendar</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center sm:gap-2">
             <button
               onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
               className="pl-2 md:p-2 hover:bg-dark-300 rounded-lg transition"
@@ -475,24 +475,24 @@ export default function DashboardPage() {
 
       {/* Recent Workouts */}
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl md:text-3xl font-bold text-white flex items-center gap-3">
-            <Icons.Calendar className="w-8 h-8 text-primary-500" />
+        <div className="flex sm:flex-row justify-between sm:items-center gap-4 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+            <Icons.Calendar className="w-6 h-6 md:w-8 md:h-8 text-primary-500" />
             Recent Workouts
           </h2>
           <Link
             href="/workouts"
-            className="text-primary-500 hover:text-primary-400 transition flex items-center gap-2 font-semibold text-sm"
+            className="text-primary-500 hover:text-primary-400 transition flex items-center gap-2 font-semibold text-sm self-start sm:self-auto"
           >
             View All
-            <Icons.ArrowRight className="w-5 h-5" />
+            <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
           </Link>
         </div>
 
         {workoutHistory.length === 0 ? (
           <div className="card text-center py-12">
-            <Icons.Dumbbell className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg mb-4">No workouts yet</p>
+            <Icons.Dumbbell className="w-12 h-12 md:w-16 md:h-16 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400 text-base md:text-lg mb-4">No workouts yet</p>
             <Link href="/templates" className="btn-primary inline-block">
               Start Your First Workout
             </Link>
@@ -503,37 +503,47 @@ export default function DashboardPage() {
               <div
                 key={workout.id}
                 onClick={() => router.push(`/workouts/${workout.id}`)}
-                className="card hover:border-primary-500/50 transition-all group cursor-pointer"
+                className="card hover:border-primary-500/50 transition-all group cursor-pointer p-4"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary-500/10 p-3 rounded-xl group-hover:bg-primary-500/20 transition-colors">
-                      <Icons.Check className="w-5 h-5 text-primary-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold text-md md:text-lg">
-                        {getSessionName(workout)}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-400 mt-1">
-                        <span className="flex items-center gap-1">
-                          <Icons.Clock className="w-4 h-4 md:w-6 md:h-6" />
-                          {format(new Date(workout.clockIn), 'h:mm a')}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Icons.Clock className="w-4 h-4" />
-                          {workout.durationMinutes} min
-                        </span>
-                      </div>
+                {/* Mobile Layout */}
+                <div className="flex items-start gap-3 sm:items-center">
+                  {/* Icon */}
+                  <div className="bg-primary-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-primary-500/20 transition-colors flex-shrink-0">
+                    <Icons.Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500" />
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-bold text-sm sm:text-lg mb-1 truncate">
+                      {getSessionName(workout)}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        {format(new Date(workout.clockIn), 'MMM dd')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        {workout.durationMinutes} min
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+
+                  {/* Status & Arrow */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {workout.isWorkoutFinished && (
-                      <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
-                        <Icons.Check className="w-4 h-4 mr-1" />
-                        Completed
+                      <div className="hidden sm:flex badge sm:bg-green-500/10 sm:text-green-500 sm:border sm:border-green-500/30">
+                        <Icons.Check className="hidden w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        <span className="hidden sm:inline">Completed</span>
                       </div>
                     )}
-                    <Icons.ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                    {/* Green checkmark for mobile */}
+                    {workout.isWorkoutFinished && (
+                      <div className="sm:hidden w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <Icons.Check className="w-4 h-4 text-green-500" />
+                      </div>
+                    )}
+                    <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                   </div>
                 </div>
               </div>

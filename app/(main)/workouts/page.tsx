@@ -548,52 +548,59 @@ export default function WorkoutPage() {
           {/* Workout History */}
           {workoutHistory.length > 0 && (
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <Icons.Calendar className="w-6 h-6 text-primary-500" />
+              <h2 className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <Icons.Calendar className="w-5 h-5 md:w-6 md:h-6 text-primary-500" />
                 Recent History
               </h2>
               
               <div className="space-y-3">
                 {workoutHistory.slice(0, 10).map((workout) => {
                   const workoutName = workout.workoutTemplate?.name 
-                    ? `${workout.workoutTemplate.name} - ${format(new Date(workout.clockIn), 'MMM dd, yyyy')}`
-                    : `Workout - ${format(new Date(workout.clockIn), 'MMM dd, yyyy')}`;
+                    ? `${workout.workoutTemplate.name}`
+                    : 'Workout';
                   
                   return (
                     <div
                       key={workout.id}
                       onClick={() => router.push(`/workouts/${workout.id}`)}
-                      className="card hover:border-primary-500/50 transition-all cursor-pointer group"
+                      className="card hover:border-primary-500/50 transition-all cursor-pointer group p-3 sm:p-4"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-green-500/10 p-3 rounded-xl group-hover:bg-green-500/20 transition-colors">
-                            <Icons.Check className="w-6 h-6 text-green-500" />
-                          </div>
-                          <div>
-                            <h3 className="text-white font-bold text-lg">
-                              {workoutName}
-                            </h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-400 mt-1">
-                              <span className="flex items-center gap-1">
-                                <Icons.Clock className="w-4 h-4" />
-                                {format(new Date(workout.clockIn), 'h:mm a')}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Icons.Clock className="w-4 h-4" />
-                                {workout.durationMinutes} min
-                              </span>
-                            </div>
+                      <div className="flex items-start gap-3 sm:items-center">
+                        {/* Icon */}
+                        <div className="bg-green-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-green-500/20 transition-colors flex-shrink-0">
+                          <Icons.Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-bold text-sm sm:text-lg truncate">
+                            {workoutName}
+                          </h3>
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 mt-1">
+                            <span className="flex items-center gap-1">
+                              <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {format(new Date(workout.clockIn), 'MMM dd, yyyy')}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {workout.durationMinutes} min
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        
+                        {/* Status & Arrow */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {workout.isWorkoutFinished && (
-                            <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
-                              <Icons.Check className="w-4 h-4 mr-1" />
-                              Completed
-                            </div>
+                            <>
+                              {/* Desktop badge */}
+                              <div className="flex badge bg-green-500/10 text-green-500 border border-green-500/30">
+                                <Icons.Check className="w-4 h-4 mr-1" />
+                                Completed
+                              </div>
+                 
+                            </>
                           )}
-                          <Icons.ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                          <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
                     </div>
@@ -602,6 +609,7 @@ export default function WorkoutPage() {
               </div>
             </div>
           )}
+
         </div>
       )}
     </div>

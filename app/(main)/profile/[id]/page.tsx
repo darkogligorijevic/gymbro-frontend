@@ -73,7 +73,7 @@ export default function ProfilePage() {
       <div className="rounded-3xl relative overflow-hidden p-8 md:p-12 shadow-2xl">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-purple-600/20"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-6">
             <img
               src={user.avatarUrl ? `${API_URL}${user.avatarUrl}` : '/default-avatar.png'}
               alt={user.username}
@@ -82,7 +82,7 @@ export default function ProfilePage() {
             
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-white">
+                <h1 className="text-4xl font-bold text-white">
                   {user.firstName || user.username}
                   {user.lastName && ` ${user.lastName}`}
                 </h1>
@@ -99,7 +99,7 @@ export default function ProfilePage() {
             </div>
 
             {isOwnProfile && (
-              <Link href="/settings" className="btn-primary">
+              <Link href="/settings" className="text-center w-full btn-primary">
                 Edit Profile
               </Link>
             )}
@@ -108,7 +108,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 justify-center text-center gap-6">
         <div className="card-hover group">
           <div className="bg-primary-500/10 rounded-2xl p-4 mb-4 inline-block group-hover:scale-110 transition-transform">
             <Icons.Trophy className="w-8 h-8 text-primary-500" />
@@ -215,48 +215,62 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentWorkouts.map((workout) => (
-              <div
-                key={workout.id}
-                className={`p-4 bg-dark-300 rounded-xl border border-dark-200 ${
-                  isOwnProfile ? 'hover:border-primary-500/50 transition-all cursor-pointer' : ''
-                }`}
-                onClick={() => isOwnProfile && router.push(`/workouts/${workout.id}`)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${
-                      workout.isCompleted ? 'bg-green-500/10' : 'bg-primary-500/10'
-                    }`}>
-                      <Icons.Check className={`w-6 h-6 ${
-                        workout.isCompleted ? 'text-green-500' : 'text-primary-500'
-                      }`} />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold">{workout.templateName}</h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-400 mt-1">
-                        <span className="flex items-center gap-1">
-                          <Icons.Calendar className="w-4 h-4" />
-                          {format(new Date(workout.date), 'MMM dd, yyyy')}
-                        </span>
-                        {workout.duration && (
-                          <span className="flex items-center gap-1">
-                            <Icons.Clock className="w-4 h-4" />
-                            {workout.duration} min
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {workout.isCompleted && (
-                    <div className="badge bg-green-500/10 text-green-500 border border-green-500/30">
-                      Completed
-                    </div>
-                  )}
+      {recentWorkouts.slice(0, 10).map((workout) => {
+        const workoutName = workout.templateName 
+          ? `${workout.templateName}`
+          : 'Workout';
+        
+        return (
+          <div
+            key={workout.id}
+            onClick={() => router.push(`/workouts/${workout.id}`)}
+            className="card hover:border-primary-500/50 transition-all cursor-pointer group p-3 sm:p-4"
+          >
+            <div className="flex items-start gap-3 sm:items-center">
+              {/* Icon */}
+              <div className="bg-green-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-green-500/20 transition-colors flex-shrink-0">
+                <Icons.Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-bold text-sm sm:text-lg truncate">
+                  {workoutName}
+                </h3>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 mt-1">
+                  <span className="flex items-center gap-1">
+                    <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                    {format(new Date(workout.date), 'MMM dd, yyyy')}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                    {workout.duration} min
+                  </span>
                 </div>
               </div>
-            ))}
+              
+              {/* Status & Arrow */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {workout.isCompleted && (
+                  <>
+                    {/* Desktop badge */}
+                    <div className="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-500 border border-green-500/30">
+                      <Icons.Check className="w-4 h-4 mr-1" />
+                      Completed
+                    </div>
+                    {/* Mobile checkmark */}
+                    <div className="sm:hidden w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <Icons.Check className="w-4 h-4 text-green-500" />
+                    </div>
+                  </>
+                )}
+                <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
           </div>
+        );
+      })}
+    </div>
         )}
       </div>
 

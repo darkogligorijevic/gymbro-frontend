@@ -126,3 +126,42 @@ body {
   background: linear-gradient(to right, #1a1a1a 4%, #242424 25%, #1a1a1a 36%);
   background-size: 1000px 100%;
 }
+
+@media (max-width: 640px) {
+  /* Make cards more compact on mobile */
+  .workout-card-mobile {
+    @apply p-3;
+  }
+  
+  /* Stack elements vertically on mobile */
+  .workout-card-content {
+    @apply flex-col items-start gap-2;
+  }
+  
+  /* Make badges smaller */
+  .badge {
+    @apply text-xs px-2 py-0.5;
+  }
+  
+  /* Adjust icon sizes */
+  .workout-icon {
+    @apply w-4 h-4;
+  }
+  
+  /* Text adjustments */
+  .workout-title {
+    @apply text-base;
+  }
+  
+  .workout-subtitle {
+    @apply text-xs;
+  }
+}
+
+/* Touch target improvements */
+@media (max-width: 640px) {
+  button, a, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

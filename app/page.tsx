@@ -52,8 +52,8 @@ export default function HomePage() {
               <Icons.Lightning className="w-10 h-10 text-primary-500" />
               <span className="text-3xl font-bold gradient-text">Gymbro</span>
             </Link>
-            <div className=" hidden sm:flex gap-4">
-              <Link href="/login" className="btn-secondary">
+            <div className="flex gap-4">
+              <Link href="/login" className="hidden sm:block btn-secondary">
                 Login
               </Link>
               <Link href="/register" className="btn-primary">

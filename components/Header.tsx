@@ -13,11 +13,20 @@ export default function Header() {
   const { user, logout, checkAuth } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Desktop search
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  
+  // Mobile search
+  const [mobileSearchQuery, setMobileSearchQuery] = useState('');
+  const [mobileSearchResults, setMobileSearchResults] = useState<User[]>([]);
+  const [showMobileSearchResults, setShowMobileSearchResults] = useState(false);
+  const [isMobileSearching, setIsMobileSearching] = useState(false);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   // user dropdown
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -33,7 +42,7 @@ export default function Header() {
     if (isHydrated && !user) router.push('/login');
   }, [isHydrated, user, router]);
 
-  // Search functionality (debounced)
+  // Desktop Search functionality (debounced)
   useEffect(() => {
     const searchUsers = async () => {
       if (searchQuery.trim().length < 2) {
@@ -55,12 +64,37 @@ export default function Header() {
     return () => clearTimeout(debounce);
   }, [searchQuery]);
 
+  // Mobile Search functionality (debounced)
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (mobileSearchQuery.trim().length < 2) {
+        setMobileSearchResults([]);
+        return;
+      }
+      setIsMobileSearching(true);
+      try {
+        const response = await usersApi.search(mobileSearchQuery);
+        setMobileSearchResults(response.data);
+      } catch (error) {
+        console.error('Mobile search error:', error);
+        setMobileSearchResults([]);
+      } finally {
+        setIsMobileSearching(false);
+      }
+    };
+    const debounce = setTimeout(searchUsers, 300);
+    return () => clearTimeout(debounce);
+  }, [mobileSearchQuery]);
+
   // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSearchResults(false);
+      }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(target)) {
+        setShowMobileSearchResults(false);
       }
       if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setUserMenuOpen(false);
@@ -113,7 +147,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Search Bar */}
+            {/* Desktop Search Bar */}
             <div className="hidden lg:block relative" ref={searchRef}>
               <div className="relative">
                 <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -130,7 +164,7 @@ export default function Header() {
                 />
               </div>
 
-              {/* Search Results Dropdown */}
+              {/* Desktop Search Results Dropdown */}
               {showSearchResults && (searchResults.length > 0 || isSearching || searchQuery.length >= 2) && (
                 <div className="absolute top-full mt-2 w-full bg-dark-300 rounded-xl border border-dark-200 shadow-2xl max-h-96 overflow-y-auto">
                   {isSearching ? (
@@ -258,18 +292,62 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-dark-200 bg-dark-400">
           <div className="px-4 py-4 space-y-2">
-            {/* Mobile Search */}
-            <div className="mb-4">
+            {/* Mobile Search - WITH FULL FUNCTIONALITY */}
+            <div className="mb-4" ref={mobileSearchRef}>
               <div className="relative">
                 <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={mobileSearchQuery}
+                  onChange={(e) => {
+                    setMobileSearchQuery(e.target.value);
+                    setShowMobileSearchResults(true);
+                  }}
+                  onFocus={() => setShowMobileSearchResults(true)}
                   className="w-full pl-10 pr-4 py-2 bg-dark-300 text-white rounded-xl border-2 border-dark-200 focus:border-primary-500 focus:outline-none"
                 />
               </div>
+
+              {/* Mobile Search Results */}
+              {showMobileSearchResults && (mobileSearchResults.length > 0 || isMobileSearching || mobileSearchQuery.length >= 2) && (
+                <div className="mt-2 bg-dark-300 rounded-xl border border-dark-200 shadow-xl max-h-64 overflow-y-auto">
+                  {isMobileSearching ? (
+                    <div className="p-4 text-center text-gray-400">
+                      <div className="animate-spin w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full mx-auto"></div>
+                    </div>
+                  ) : mobileSearchResults.length > 0 ? (
+                    mobileSearchResults.map((result) => (
+                      <Link
+                        key={result.id}
+                        href={`/profile/${result.id}`}
+                        onClick={() => {
+                          setShowMobileSearchResults(false);
+                          setMobileSearchQuery('');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 hover:bg-dark-200 transition-colors border-b border-dark-200 last:border-b-0"
+                      >
+                        <img
+                          src={result.avatarUrl ? `${API_URL}${result.avatarUrl}` : '/default-avatar.png'}
+                          alt={result.username}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div>
+                          <div className="text-white font-semibold">{result.username}</div>
+                          {(result.firstName || result.lastName) && (
+                            <div className="text-sm text-gray-400">
+                              {result.firstName} {result.lastName}
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-gray-400">No users found</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {navItems.map((item) => {

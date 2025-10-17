@@ -196,7 +196,7 @@ export default function WorkoutDetailPage() {
                         : 'bg-primary-500/20 text-primary-500'
                     }`}>
                       {exercise.status === 'finished' ? (
-                        <Icons.Check className="w-6 h-6" />
+                        <Icons.Check className="w-4 h-4 md:w-6 md:h-6" />
                       ) : (
                         index + 1
                       )}
