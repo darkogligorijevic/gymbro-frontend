@@ -93,7 +93,7 @@ export default function WorkoutDetailPage() {
         >
           <Icons.ArrowLeft className="w-6 h-6 text-white" />
         </button>
-        <h1 className="text-4xl md:text-5xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-2xl md:text-5xl font-bold text-white flex items-center gap-3">
           <Icons.Calendar className="w-10 h-10 text-primary-500" />
           Workout Details
         </h1>
@@ -106,15 +106,15 @@ export default function WorkoutDetailPage() {
           <div className="flex items-center gap-3 mb-4">
             {workout.isWorkoutFinished ? (
               <div className="bg-green-500 p-3 rounded-xl">
-                <Icons.Check className="w-8 h-8 text-white" />
+                <Icons.Check className="w-5 h-5 md:w-8 md:h-8 text-white" />
               </div>
             ) : (
               <div className="bg-white/20 p-3 rounded-xl">
-                <Icons.Clock className="w-8 h-8 text-white" />
+                <Icons.Clock className="w-5 h-5 md:w-8 md:h-8 text-white" />
               </div>
             )}
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white">
+              <h2 className="text-xl md:text-4xl font-bold text-white">
                 {getSessionName()}
               </h2>
               <p className="text-white/80 text-lg mt-1">
@@ -190,7 +190,7 @@ export default function WorkoutDetailPage() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                    <div className={`w-6 h-6 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 ${
                       exercise.status === 'finished'
                         ? 'bg-green-500 text-white'
                         : 'bg-primary-500/20 text-primary-500'
@@ -308,7 +308,7 @@ export default function WorkoutDetailPage() {
                                   <div className="text-xs text-gray-400">kg (actual)</div>
                                 </div>
                                 <div className="text-gray-500">×</div>
-                                <div className="text-right">
+                                <div className="text-center">
                                   <div className="text-2xl font-bold text-green-500">
                                     {set.actualReps}
                                   </div>

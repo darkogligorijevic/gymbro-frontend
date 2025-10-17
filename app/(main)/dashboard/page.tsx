@@ -175,7 +175,7 @@ export default function DashboardPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <Icons.Fire className="w-10 h-10 text-white animate-bounce-slow" />
-            <h1 className="text-4xl md:text-5xl font-bold text-white text-shadow">
+            <h1 className="text-3xl md:text-5xl font-bold text-white text-shadow">
               Welcome, {user?.firstName || user?.username}!
             </h1>
           </div>
@@ -185,7 +185,7 @@ export default function DashboardPage() {
           {!activeWorkout && (
             <Link
               href="/templates"
-              className="inline-flex items-center gap-2 bg-white text-primary-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center text-center gap-2 bg-white text-primary-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg w-full md:w-auto"
             >
               <Icons.Lightning className="w-5 h-5" />
               Start New Workout
@@ -334,16 +334,16 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Icons.Calendar className="w-8 h-8 text-primary-500" />
-            <h2 className="text-sm sm:text-xl md:text-2xl font-bold text-white">Activity Calendar</h2>
+            <h2 className="text-sm md:text-2xl font-bold text-white">Activity Calendar</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
-              className="p-2 hover:bg-dark-300 rounded-lg transition"
+              className="pl-2 md:p-2 hover:bg-dark-300 rounded-lg transition"
             >
               <Icons.ArrowLeft className="w-5 h-5 text-gray-400" />
             </button>
-            <span className="text-white text-sm md:text-xl font-semibold min-w-32 text-center">
+            <span className="text-white text-sm md:text-xl font-semibold min-w-28 md:min-w-32 text-center">
               {format(selectedMonth, 'MMMM yyyy')}
             </span>
             <button
@@ -387,7 +387,7 @@ export default function DashboardPage() {
                   {format(date, 'd')}
                 </div>
                 {hasWorkout && workout && (
-                  <div className="mt-1">
+                  <div className="mt-1 hidden md:block">
                     <div className="w-2 h-2 bg-green-500 rounded-full mx-auto" />
                     <div className="text-xs text-green-400 text-center mt-1">
                       {workout.durationMinutes}m
@@ -476,13 +476,13 @@ export default function DashboardPage() {
       {/* Recent Workouts */}
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h2 className="text-xl md:text-3xl font-bold text-white flex items-center gap-3">
             <Icons.Calendar className="w-8 h-8 text-primary-500" />
             Recent Workouts
           </h2>
           <Link
             href="/workouts"
-            className="text-primary-500 hover:text-primary-400 transition flex items-center gap-2 font-semibold"
+            className="text-primary-500 hover:text-primary-400 transition flex items-center gap-2 font-semibold text-sm"
           >
             View All
             <Icons.ArrowRight className="w-5 h-5" />
@@ -508,15 +508,15 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary-500/10 p-3 rounded-xl group-hover:bg-primary-500/20 transition-colors">
-                      <Icons.Check className="w-6 h-6 text-primary-500" />
+                      <Icons.Check className="w-5 h-5 text-primary-500" />
                     </div>
                     <div>
-                      <h3 className="text-white font-bold text-lg">
+                      <h3 className="text-white font-bold text-md md:text-lg">
                         {getSessionName(workout)}
                       </h3>
                       <div className="flex items-center gap-4 text-sm text-gray-400 mt-1">
                         <span className="flex items-center gap-1">
-                          <Icons.Clock className="w-4 h-4" />
+                          <Icons.Clock className="w-4 h-4 md:w-6 md:h-6" />
                           {format(new Date(workout.clockIn), 'h:mm a')}
                         </span>
                         <span className="flex items-center gap-1">

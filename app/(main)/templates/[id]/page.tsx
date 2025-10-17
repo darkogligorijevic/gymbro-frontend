@@ -128,7 +128,7 @@ export default function TemplateDetailPage() {
             Back to Templates
           </Link>
           
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-3">
             {currentTemplate.name}
           </h1>
           
@@ -249,7 +249,7 @@ export default function TemplateDetailPage() {
 
       {/* Bottom Actions */}
       <div className="card bg-gradient-to-r from-primary-600 to-orange-600">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 className="text-2xl font-bold text-white mb-2">Ready to crush it?</h3>
             <p className="text-white/90">Start this workout and track your progress</p>
@@ -257,7 +257,7 @@ export default function TemplateDetailPage() {
           <button
             onClick={handleStartWorkout}
             disabled={starting}
-            className="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105 disabled:opacity-50 whitespace-nowrap"
+            className="bg-white text-primary-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105 disabled:opacity-50 whitespace-nowrap w-full md:w-auto"
           >
             {starting ? 'Starting...' : 'Start Workout Now'}
           </button>

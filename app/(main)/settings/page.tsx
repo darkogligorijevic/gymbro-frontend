@@ -142,7 +142,7 @@ export default function SettingsPage() {
     <div className="mx-auto space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold text-white mb-2">Settings</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Settings</h1>
         <p className="text-gray-400">Manage your account settings and preferences</p>
       </div>
 
@@ -172,7 +172,7 @@ export default function SettingsPage() {
           Profile Picture
         </h2>
         
-        <div className="flex items-center gap-6">
+        <div className="md:flex items-center gap-6">
           <img
             src={user.avatarUrl ? `${API_URL}${user.avatarUrl}` : '/default-avatar.png'}
             alt={user.username}
@@ -180,7 +180,7 @@ export default function SettingsPage() {
           />
           
           <div className="flex-1">
-            <p className="text-gray-400 mb-4">
+            <p className="text-gray-400 mb-4 text-sm">
               Upload a new profile picture. Max size: 5MB
             </p>
             <input
@@ -193,7 +193,7 @@ export default function SettingsPage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="btn-primary flex items-center gap-2"
+              className="w-full md:w-auto btn-primary flex items-center gap-2"
             >
               <Icons.Upload className="w-5 h-5" />
               {isLoading ? 'Uploading...' : 'Upload New Picture'}
@@ -260,7 +260,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary"
+            className="w-full md:w-auto btn-primary"
           >
             {isLoading ? 'Saving...' : 'Save Changes'}
           </button>
@@ -314,7 +314,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary"
+            className="w-full md:w-auto btn-primary"
           >
             {isLoading ? 'Changing...' : 'Change Password'}
           </button>
@@ -335,7 +335,7 @@ export default function SettingsPage() {
             </p>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all"
+              className="w-full md:w-auto bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all"
             >
               Delete Account
             </button>

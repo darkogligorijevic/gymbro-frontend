@@ -169,7 +169,7 @@ export default function WorkoutPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl md:text-5xl font-bold text-white flex items-center gap-3">
+      <h1 className="text-3xl md:text-5xl font-bold text-white flex items-center gap-3">
         <Icons.Lightning className="w-10 h-10 text-primary-500" />
         Workout Session
       </h1>

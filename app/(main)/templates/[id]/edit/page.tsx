@@ -213,7 +213,7 @@ export default function EditTemplatePage() {
           Back to Template
         </Link>
         
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+        <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
           <Icons.Edit className="w-10 h-10 text-primary-500" />
           Edit Template
         </h1>
@@ -281,7 +281,7 @@ export default function EditTemplatePage() {
                 <span className="text-gray-400 text-lg">({exercisesForms.length})</span>
               )}
             </h2>
-            <div className="flex gap-2">
+            <div className="hidden md:flex gap-2">
               <button
                 type="button"
                 onClick={handleBulkAddExercises}

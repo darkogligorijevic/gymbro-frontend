@@ -214,7 +214,7 @@ export default function ExerciseDetailPage() {
           <div className="flex-1">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                   {currentExercise.name}
                 </h1>
                 <div

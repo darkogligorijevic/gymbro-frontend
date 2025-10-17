@@ -76,7 +76,7 @@ export default function ExercisesPage() {
       <div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
               <Icons.Dumbbell className="w-10 h-10 text-primary-500" />
               {isSelectionMode ? 'Select Exercises' : 'Exercise Library'}
             </h1>

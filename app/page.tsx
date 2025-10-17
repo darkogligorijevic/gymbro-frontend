@@ -92,15 +92,15 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary-500 mb-2">100+</div>
+                <div className="text-3xl md:text-4xl font-bold text-primary-500 mb-2">100+</div>
                 <div className="text-gray-400">Exercises</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary-500 mb-2">∞</div>
+                <div className="text-3xl md:text-4xl font-bold text-primary-500 mb-2">∞</div>
                 <div className="text-gray-400">Workouts</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary-500 mb-2">24/7</div>
+                <div className="text-3xl md:text-4xl font-bold text-primary-500 mb-2">24/7</div>
                 <div className="text-gray-400">Tracking</div>
               </div>
             </div>
@@ -110,7 +110,7 @@ export default function HomePage() {
         {/* Features */}
         <div className="container mx-auto px-6 py-20">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Everything You Need to <span className="gradient-text">Succeed</span>
             </h2>
             <p className="text-gray-400 text-lg">Powerful features designed for serious lifters</p>
@@ -133,7 +133,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-20">
           <div className="card bg-gradient-to-r from-primary-600 to-primary-500 text-center max-w-4xl mx-auto">
             <Icons.Fire className="w-16 h-16 text-white mx-auto mb-6 animate-bounce-slow" />
-            <h2 className="text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
             <p className="text-white/90 text-lg mb-8">
               Join thousands of athletes tracking their progress
             </p>
