@@ -4,6 +4,8 @@ import { useWorkout } from '@/hooks/useWorkout';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { Icons } from '@/components/Icons';
+import { Modal } from '@/components/Modal';
+import { useToast } from '@/hooks/useToast';
 
 export default function WorkoutPage() {
   const router = useRouter();
@@ -26,6 +28,19 @@ export default function WorkoutPage() {
   const [showAddSet, setShowAddSet] = useState<string | null>(null);
   const [newSetWeight, setNewSetWeight] = useState<number>(0);
   const [newSetReps, setNewSetReps] = useState<number>(8);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'danger' | 'warning' | 'info';
+  }>({
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'info',
+  });
+  const toast = useToast();
 
   useEffect(() => {
     getActiveWorkout();
@@ -45,7 +60,7 @@ export default function WorkoutPage() {
       setWasActive(true);
     }
     if (wasActive && !activeWorkout) {
-      alert('🎉 All exercises completed! Workout finished automatically. Great job! 💪');
+      toast.success('🎉 All exercises completed! Workout finished automatically. Great job! 💪', 5000);
       fetchHistory();
       router.push('/dashboard');
     }
@@ -57,22 +72,23 @@ export default function WorkoutPage() {
     const weight = weightInput[setId] || targetWeight;
     
     if (reps <= 0) {
-      alert('Please enter reps completed');
+      toast.warning('Please enter reps completed');
       return;
     }
     try {
       await completeSet(activeWorkout.id, setId, reps, weight !== targetWeight ? weight : undefined);
       setRepsInput({ ...repsInput, [setId]: 0 });
       setWeightInput({ ...weightInput, [setId]: 0 });
+      toast.success('Set completed! 💪');
     } catch (error) {
-      alert('Failed to complete set');
+      toast.error('Failed to complete set');
     }
   };
 
   const handleAddSet = async (exerciseId: string) => {
     if (!activeWorkout) return;
     if (newSetWeight <= 0 || newSetReps <= 0) {
-      alert('Please enter valid weight and reps');
+      toast.warning('Please enter valid weight and reps');
       return;
     }
     try {
@@ -80,28 +96,38 @@ export default function WorkoutPage() {
       setShowAddSet(null);
       setNewSetWeight(0);
       setNewSetReps(8);
+      toast.success('Set added successfully!');
     } catch (error) {
-      alert('Failed to add set');
+      toast.error('Failed to add set');
     }
   };
 
   const handleSkipExercise = async (exerciseId: string) => {
     if (!activeWorkout) return;
-    if (confirm('Skip this exercise? You can resume it later.')) {
-      try {
-        await skipExercise(activeWorkout.id, exerciseId);
-      } catch (error: any) {
-        alert(error.response?.data?.message || 'Failed to skip exercise');
-      }
-    }
+    
+    setModalConfig({
+      title: 'Skip Exercise?',
+      message: 'Skip this exercise? You can resume it later.',
+      onConfirm: async () => {
+        try {
+          await skipExercise(activeWorkout.id, exerciseId);
+          toast.info('Exercise skipped');
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || 'Failed to skip exercise');
+        }
+      },
+      type: 'warning',
+    });
+    setModalOpen(true);
   };
 
   const handleResumeExercise = async (exerciseId: string) => {
     if (!activeWorkout) return;
     try {
       await resumeExercise(activeWorkout.id, exerciseId);
+      toast.success('Exercise resumed!');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to resume exercise');
+      toast.error(error.response?.data?.message || 'Failed to resume exercise');
     }
   };
 
@@ -109,24 +135,30 @@ export default function WorkoutPage() {
     if (!activeWorkout) return;
     
     if (activeWorkout.isWorkoutFinished) {
-      alert('This workout is already finished!');
+      toast.warning('This workout is already finished!');
       await getActiveWorkout();
       return;
     }
     
-    if (confirm('Are you sure you want to finish this workout?')) {
-      try {
-        await finishWorkout(activeWorkout.id);
-        alert('Workout completed! Great job! 💪');
-        await fetchHistory();
-        router.push('/dashboard');
-      } catch (error: any) {
-        console.error('Finish workout error:', error);
-        const errorMsg = error.response?.data?.message || 'Failed to finish workout';
-        alert(errorMsg);
-        await getActiveWorkout();
-      }
-    }
+    setModalConfig({
+      title: 'Finish Workout?',
+      message: 'Are you sure you want to finish this workout?\n\nYour progress will be saved.',
+      onConfirm: async () => {
+        try {
+          await finishWorkout(activeWorkout.id);
+          toast.success('Workout completed! Great job! 💪', 4000);
+          await fetchHistory();
+          router.push('/dashboard');
+        } catch (error: any) {
+          console.error('Finish workout error:', error);
+          const errorMsg = error.response?.data?.message || 'Failed to finish workout';
+          toast.error(errorMsg);
+          await getActiveWorkout();
+        }
+      },
+      type: 'info',
+    });
+    setModalOpen(true);
   };
 
   const getElapsedTime = () => {
@@ -159,7 +191,6 @@ export default function WorkoutPage() {
   const totalExercises = activeWorkout?.exercises?.length || 0;
   const progress = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
 
-  // Generate session name
   const getSessionName = () => {
     if (!activeWorkout) return '';
     const templateName = activeWorkout.workoutTemplate?.name || 'Workout';
@@ -169,6 +200,17 @@ export default function WorkoutPage() {
 
   return (
     <div className="space-y-8">
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText="Confirm"
+        cancelText="Cancel"
+        type={modalConfig.type}
+      />
+
       <h1 className="text-3xl md:text-5xl font-bold text-white flex items-center gap-3">
         <Icons.Lightning className="w-10 h-10 text-primary-500" />
         Workout Session
@@ -206,7 +248,6 @@ export default function WorkoutPage() {
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
                   <div className="mt-4">
                     <div className="bg-white/20 rounded-full h-2 overflow-hidden">
                       <div 
@@ -218,7 +259,6 @@ export default function WorkoutPage() {
                 </div>
 
                 <div className="flex flex-col gap-3 lg:w-64">
-                  {/* Timer */}
                   <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
                     <div className="text-white/80 text-sm mb-1 uppercase tracking-wider">Time</div>
                     <div className="text-5xl font-bold text-white">
@@ -374,66 +414,6 @@ export default function WorkoutPage() {
                   </div>
                 ))}
               </div>
-
-              {/* Add Set Button - TEMPORARILY DISABLED
-              <div className="mt-4">
-                {showAddSet === currentExercise.id ? (
-                  <div className="bg-dark-300 rounded-xl p-4 space-y-3">
-                    <h4 className="font-bold text-white">Add Extra Set</h4>
-                    <div className="flex gap-3 items-end flex-wrap">
-                      <div className="flex-1 min-w-[100px]">
-                        <label className="text-sm text-gray-400 mb-1 block">Weight (kg)</label>
-                        <input
-                          type="number"
-                          value={newSetWeight || ''}
-                          onChange={(e) => setNewSetWeight(parseFloat(e.target.value) || 0)}
-                          className="w-full px-4 py-2 rounded-xl bg-dark-200 text-white border-2 border-dark-100 focus:border-primary-500 focus:outline-none"
-                          placeholder="80"
-                          step="0.5"
-                          min="0"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-[100px]">
-                        <label className="text-sm text-gray-400 mb-1 block">Reps</label>
-                        <input
-                          type="number"
-                          value={newSetReps || ''}
-                          onChange={(e) => setNewSetReps(parseInt(e.target.value) || 0)}
-                          className="w-full px-4 py-2 rounded-xl bg-dark-200 text-white border-2 border-dark-100 focus:border-primary-500 focus:outline-none"
-                          placeholder="8"
-                          min="1"
-                        />
-                      </div>
-                      <button
-                        onClick={() => handleAddSet(currentExercise.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-xl font-semibold transition-all"
-                      >
-                        Add Set
-                      </button>
-                      <button
-                        onClick={() => setShowAddSet(null)}
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-xl font-semibold transition-all"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      const lastSet = currentExercise.sets[currentExercise.sets.length - 1];
-                      setNewSetWeight(lastSet?.targetWeight || 0);
-                      setNewSetReps(lastSet?.targetReps || 8);
-                      setShowAddSet(currentExercise.id);
-                    }}
-                    className="w-full bg-dark-300 hover:bg-dark-200 text-gray-300 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all border-2 border-dashed border-gray-600 hover:border-primary-500"
-                  >
-                    <Icons.Plus className="w-5 h-5 inline mr-2" />
-                    Add Extra Set
-                  </button>
-                )}
-              </div>
-              */}
             </div>
           )}
 
@@ -566,12 +546,10 @@ export default function WorkoutPage() {
                       className="card hover:border-primary-500/50 transition-all cursor-pointer group p-3 sm:p-4"
                     >
                       <div className="flex items-start gap-3 sm:items-center">
-                        {/* Icon */}
                         <div className="bg-green-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-green-500/20 transition-colors flex-shrink-0">
                           <Icons.Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
                         </div>
                         
-                        {/* Content */}
                         <div className="flex-1 min-w-0">
                           <h3 className="text-white font-bold text-sm sm:text-lg truncate">
                             {workoutName}
@@ -588,16 +566,13 @@ export default function WorkoutPage() {
                           </div>
                         </div>
                         
-                        {/* Status & Arrow */}
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {workout.isWorkoutFinished && (
                             <>
-                              {/* Desktop badge */}
                               <div className="flex badge bg-green-500/10 text-green-500 border border-green-500/30">
                                 <Icons.Check className="w-4 h-4 mr-1" />
                                 Completed
                               </div>
-                 
                             </>
                           )}
                           <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
@@ -609,7 +584,6 @@ export default function WorkoutPage() {
               </div>
             </div>
           )}
-
         </div>
       )}
     </div>

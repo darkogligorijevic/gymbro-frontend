@@ -4,83 +4,84 @@ import { useTemplates } from '@/hooks/useTemplates';
 import { workoutApi } from '@/lib/api';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
+import { Modal } from '@/components/Modal';
+import { useToast } from '@/hooks/useToast';
 
 export default function TemplatesPage() {
   const { templates, isLoading, fetchTemplates, deleteTemplate } = useTemplates();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string; hasWorkouts: boolean } | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const loadTemplates = async () => {
       try {
         await fetchTemplates();
       } catch (error: any) {
-        console.error('Failed to fetch templates:', error);
         const errorMsg = error.response?.data?.message || error.message || 'Failed to load templates';
-        alert(`Error loading templates: ${errorMsg}`);
+        toast.error(`Error loading templates: ${errorMsg}`);
       }
     };
     loadTemplates();
   }, []);
 
-  const handleDelete = async (id: string, name: string) => {
-    setDeletingId(id);
-    
+  const handleDeleteClick = async (id: string, name: string) => {
     try {
-      // Prvo proveri da li template ima workout sessions
       const workouts = await workoutApi.getAll();
       const hasWorkouts = workouts.data.some(w => w.workoutTemplateId === id);
-      
-      if (hasWorkouts) {
-        const confirmDelete = confirm(
-          `⚠️ WARNING: "${name}" has workout history!\n\n` +
-          `This template has been used in workout sessions. ` +
-          `Deleting it may affect your workout history.\n\n` +
-          `Are you ABSOLUTELY SURE you want to delete it?`
-        );
-        
-        if (!confirmDelete) {
-          setDeletingId(null);
-          return;
-        }
-      } else {
-        const confirmDelete = confirm(
-          `Are you sure you want to delete "${name}"?\n\n` +
-          `This action cannot be undone.`
-        );
-        
-        if (!confirmDelete) {
-          setDeletingId(null);
-          return;
-        }
-      }
+      setSelectedTemplate({ id, name, hasWorkouts });
+      setModalOpen(true);
+    } catch (error) {
+      toast.error('Failed to check workout history');
+    }
+  };
 
-      // Pokušaj da obrišeš
-      await deleteTemplate(id);
+  const confirmDelete = async () => {
+    if (!selectedTemplate) return;
+    
+    setDeletingId(selectedTemplate.id);
+    
+    try {
+      await deleteTemplate(selectedTemplate.id);
       await fetchTemplates();
-      alert('✅ Template deleted successfully!');
-      
+      toast.success('Template deleted successfully!', 3000);
     } catch (error: any) {
-      console.error('Delete failed:', error);
-      
-      // Prikaži specifičnu error poruku
       let errorMsg = 'Failed to delete template.';
       
       if (error.response?.status === 500) {
-        errorMsg = '❌ Cannot delete template!\n\n' +
-          'This template is being used by workout sessions. ' +
-          'You need to delete those workout sessions first, or contact support.';
+        errorMsg = 'Cannot delete template! This template is being used by workout sessions. You need to delete those workout sessions first.';
       } else if (error.response?.data?.message) {
         errorMsg = error.response.data.message;
       }
       
-      alert(errorMsg);
+      toast.error(errorMsg, 7000);
     } finally {
       setDeletingId(null);
+      setSelectedTemplate(null);
     }
   };
 
   return (
     <div className="space-y-8">
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedTemplate(null);
+        }}
+        onConfirm={confirmDelete}
+        title={selectedTemplate?.hasWorkouts ? "⚠️ Warning: Template Has History" : "Delete Template"}
+        message={
+          selectedTemplate?.hasWorkouts
+            ? `"${selectedTemplate.name}" has workout history!\n\nThis template has been used in workout sessions. Deleting it may affect your workout history.\n\nAre you ABSOLUTELY SURE you want to delete it?`
+            : `Are you sure you want to delete "${selectedTemplate?.name}"?\n\nThis action cannot be undone.`
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        type={selectedTemplate?.hasWorkouts ? "danger" : "warning"}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -190,7 +191,7 @@ export default function TemplatesPage() {
                     <Icons.Edit className="w-5 h-5" />
                   </Link>
                   <button
-                    onClick={() => handleDelete(template.id, template.name)}
+                    onClick={() => handleDeleteClick(template.id, template.name)}
                     disabled={deletingId === template.id}
                     className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-3 rounded-xl transition-all disabled:opacity-50"
                     title="Delete template"

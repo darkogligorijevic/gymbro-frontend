@@ -4,15 +4,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { usersApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { Icons } from '@/components/Icons';
+import { Modal } from '@/components/Modal';
+import { useToast } from '@/hooks/useToast';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   
   // Profile update state
   const [firstName, setFirstName] = useState(user?.firstName || '');
@@ -42,28 +43,24 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validacija fajla
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
+      toast.error('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('Image size must be less than 5MB');
+      toast.error('Image size must be less than 5MB');
       return;
     }
 
     setIsLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
       await usersApi.uploadAvatar(user.id, file);
-      setSuccess('Avatar uploaded successfully!');
-      // Refresh user data
+      toast.success('Avatar uploaded successfully!');
       window.location.reload();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to upload avatar');
+      toast.error(err.response?.data?.message || 'Failed to upload avatar');
     } finally {
       setIsLoading(false);
     }
@@ -72,8 +69,6 @@ export default function SettingsPage() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
       await usersApi.updateProfile(user.id, {
@@ -81,9 +76,9 @@ export default function SettingsPage() {
         lastName,
         username,
       });
-      setSuccess('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+      toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
     }
@@ -93,27 +88,25 @@ export default function SettingsPage() {
     e.preventDefault();
     
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
+      toast.error('New passwords do not match');
       return;
     }
 
     if (newPassword.length < 6) {
-      setError('New password must be at least 6 characters');
+      toast.error('New password must be at least 6 characters');
       return;
     }
 
     setIsLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
       await usersApi.changePassword(user.id, oldPassword, newPassword);
-      setSuccess('Password changed successfully!');
+      toast.success('Password changed successfully!');
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to change password');
+      toast.error(err.response?.data?.message || 'Failed to change password');
     } finally {
       setIsLoading(false);
     }
@@ -121,49 +114,44 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE') {
-      setError('Please type DELETE to confirm');
+      toast.error('Please type DELETE to confirm');
       return;
     }
 
     setIsLoading(true);
-    setError('');
 
     try {
       await usersApi.deleteAccount(user.id);
+      toast.success('Account deleted successfully');
       logout();
       router.push('/login');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete account');
+      toast.error(err.response?.data?.message || 'Failed to delete account');
       setIsLoading(false);
     }
   };
 
   return (
     <div className="mx-auto space-y-8">
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setDeleteConfirmText('');
+        }}
+        onConfirm={handleDeleteAccount}
+        title="⚠️ Delete Account"
+        message={`Are you absolutely sure? This action cannot be undone.\n\nPlease type DELETE to confirm.`}
+        confirmText="Yes, Delete My Account"
+        cancelText="Cancel"
+        type="danger"
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Settings</h1>
         <p className="text-gray-400">Manage your account settings and preferences</p>
       </div>
-
-      {/* Notifications */}
-      {error && (
-        <div className="card bg-red-500/10 border-red-500/30">
-          <div className="flex items-center gap-3">
-            <Icons.AlertCircle className="w-5 h-5 text-red-500" />
-            <p className="text-red-500">{error}</p>
-          </div>
-        </div>
-      )}
-
-      {success && (
-        <div className="card bg-green-500/10 border-green-500/30">
-          <div className="flex items-center gap-3">
-            <Icons.Check className="w-5 h-5 text-green-500" />
-            <p className="text-green-500">{success}</p>
-          </div>
-        </div>
-      )}
 
       {/* Avatar Section */}
       <div className="card">
@@ -328,20 +316,20 @@ export default function SettingsPage() {
           Danger Zone
         </h2>
         
-        {!showDeleteConfirm ? (
-          <div>
-            <p className="text-gray-400 mb-4">
-              Once you delete your account, there is no going back. This action will permanently delete your account, including all your workouts, templates, and personal data.
-            </p>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full md:w-auto bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all"
-            >
-              Delete Account
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
+        <div>
+          <p className="text-gray-400 mb-4">
+            Once you delete your account, there is no going back. This action will permanently delete your account, including all your workouts, templates, and personal data.
+          </p>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full md:w-auto bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all"
+          >
+            Delete Account
+          </button>
+        </div>
+
+        {showDeleteConfirm && (
+          <div className="mt-6 space-y-4 p-4 bg-dark-400 rounded-xl border-2 border-red-500/50">
             <p className="text-white font-semibold">
               Are you absolutely sure? This action cannot be undone.
             </p>
@@ -355,24 +343,6 @@ export default function SettingsPage() {
               className="input-field border-red-500/50"
               placeholder="Type DELETE to confirm"
             />
-            <div className="flex gap-3">
-              <button
-                onClick={handleDeleteAccount}
-                disabled={isLoading || deleteConfirmText !== 'DELETE'}
-                className="bg-red-500 hover:bg-red-600 disabled:bg-red-500/30 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Deleting...' : 'Yes, Delete My Account'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setDeleteConfirmText('');
-                }}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ import { useTemplates } from '@/hooks/useTemplates';
 import { useExercises } from '@/hooks/useExercises';
 import { Icons } from '@/components/Icons';
 import Link from 'next/link';
+import { useToast } from '@/hooks/useToast';
 
 interface ExerciseForm {
   exerciseId: string;
@@ -20,14 +21,13 @@ export default function NewTemplatePage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [exercisesForms, setExercisesForms] = useState<ExerciseForm[]>([]);
-  const [error, setError] = useState('');
   const hasProcessedSelection = useRef(false);
+  const toast = useToast();
 
   useEffect(() => {
     fetchExercises();
   }, [fetchExercises]);
 
-  // Auto-dodaj vežbe iz URL parametara
   useEffect(() => {
     const selectedIds = searchParams.get('selected');
     
@@ -36,17 +36,14 @@ export default function NewTemplatePage() {
     }
     
     const ids = selectedIds.split(',');
-    const uniqueIds = [...new Set(ids)]; // Ukloni duplikate
+    const uniqueIds = [...new Set(ids)];
     
-    // Proveri koliko vežbi možeš naći
     const foundCount = uniqueIds.filter(id => exercises.some(ex => ex.id === id)).length;
     
-    // Ako nisi našao sve, čekaj još
     if (foundCount < uniqueIds.length && exercises.length < 80) {
       return;
     }
     
-    // Označi odmah da je u procesu obrade
     hasProcessedSelection.current = true;
     
     const newExerciseForms: ExerciseForm[] = uniqueIds
@@ -59,9 +56,9 @@ export default function NewTemplatePage() {
     
     if (newExerciseForms.length > 0) {
       setExercisesForms(newExerciseForms);
+      toast.success(`${newExerciseForms.length} exercises added!`);
     }
     
-    // Očisti URL
     router.replace('/templates/new', { scroll: false });
   }, [searchParams, exercises, router]);
 
@@ -92,6 +89,7 @@ export default function NewTemplatePage() {
 
   const removeExercise = (index: number) => {
     setExercisesForms(exercisesForms.filter((_, i) => i !== index));
+    toast.info('Exercise removed');
   };
 
   const updateExercise = (index: number, field: string, value: any) => {
@@ -134,25 +132,24 @@ export default function NewTemplatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!name.trim()) {
-      setError('Template name is required');
+      toast.error('Template name is required');
       return;
     }
 
     if (exercisesForms.length === 0) {
-      setError('Add at least one exercise');
+      toast.error('Add at least one exercise');
       return;
     }
 
     for (let i = 0; i < exercisesForms.length; i++) {
       if (!exercisesForms[i].exerciseId) {
-        setError(`Select an exercise for exercise #${i + 1}`);
+        toast.error(`Select an exercise for exercise #${i + 1}`);
         return;
       }
       if (exercisesForms[i].sets.length === 0) {
-        setError(`Add at least one set for exercise #${i + 1}`);
+        toast.error(`Add at least one set for exercise #${i + 1}`);
         return;
       }
     }
@@ -163,9 +160,10 @@ export default function NewTemplatePage() {
         description,
         exercises: exercisesForms,
       });
+      toast.success('Template created successfully!');
       router.push(`/templates/${template.id}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create template');
+      toast.error(err.response?.data?.message || 'Failed to create template');
     }
   };
 
@@ -189,19 +187,6 @@ export default function NewTemplatePage() {
         </h1>
         <p className="text-gray-400 text-lg">Design your perfect workout routine</p>
       </div>
-
-      {/* Error Alert */}
-      {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-xl flex items-start gap-3">
-          <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
-          <div>
-            <h4 className="font-semibold mb-1">Error</h4>
-            <p>{error}</p>
-          </div>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}
@@ -320,7 +305,6 @@ export default function NewTemplatePage() {
                     </div>
 
                     <div className="space-y-4">
-                      {/* Exercise Selection */}
                       <div>
                         <label className="block text-gray-300 font-semibold mb-2">
                           Select Exercise <span className="text-red-500">*</span>
@@ -342,7 +326,6 @@ export default function NewTemplatePage() {
                         </select>
                       </div>
 
-                      {/* Notes */}
                       <div>
                         <label className="block text-gray-300 font-semibold mb-2">
                           Notes (optional)
@@ -358,7 +341,6 @@ export default function NewTemplatePage() {
                         />
                       </div>
 
-                      {/* Sets */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <label className="text-gray-300 font-semibold">Sets</label>
@@ -434,7 +416,6 @@ export default function NewTemplatePage() {
                     </div>
                   </div>
 
-                  {/* Add Exercise Button After This One */}
                   <div className="flex justify-center -my-2 relative z-10">
                     <button
                       type="button"
@@ -451,7 +432,6 @@ export default function NewTemplatePage() {
           )}
         </div>
 
-        {/* Submit Actions */}
         <div className="flex gap-4">
           <button
             type="submit"

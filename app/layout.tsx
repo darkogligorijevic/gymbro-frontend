@@ -1,19 +1,28 @@
-import type { Metadata } from 'next';
+'use client';
 import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'Gym Tracker',
-  description: 'Track your workouts effectively',
-};
+import { ToastContainer } from '@/components/Toast';
+import { useToast } from '@/hooks/useToast';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { toasts, removeToast } = useToast();
+
   return (
     <html lang="en">
-      <body className="bg-dark text-light min-h-screen">{children}</body>
+      <head>
+        <title>Gymbro</title>
+        <meta name="description" content="Track your workouts effectively" />
+      </head>
+      <body className="bg-dark text-light min-h-screen">
+        {children}
+        <ToastContainer 
+          toasts={toasts.map(toast => ({ ...toast, onClose: removeToast }))} 
+          onClose={removeToast} 
+        />
+      </body>
     </html>
   );
 }

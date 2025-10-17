@@ -5,6 +5,7 @@ import { useTemplates } from '@/hooks/useTemplates';
 import { useExercises } from '@/hooks/useExercises';
 import { Icons } from '@/components/Icons';
 import Link from 'next/link';
+import { useToast } from '@/hooks/useToast';
 
 interface ExerciseForm {
   exerciseId: string;
@@ -21,9 +22,9 @@ export default function EditTemplatePage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [exercisesForms, setExercisesForms] = useState<ExerciseForm[]>([]);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const hasProcessedSelection = useRef(false);
+  const toast = useToast();
 
   useEffect(() => {
     fetchExercises();
@@ -50,22 +51,18 @@ export default function EditTemplatePage() {
     }
   }, [currentTemplate]);
 
-  // Auto-dodaj vežbe iz URL parametara - SA ZAŠTITOM OD DUPLIKATA
   useEffect(() => {
     const selectedIds = searchParams.get('selected');
     
-    // Ako nema parametra ili je već obrađeno ili još učitava template, izađi
     if (!selectedIds || hasProcessedSelection.current || loading) {
       return;
     }
     
     if (exercises.length > 0) {
-      // Označi odmah da je u procesu obrade
       hasProcessedSelection.current = true;
       
       const ids = selectedIds.split(',');
       
-      // Proveri da li su već dodati
       const existingIds = exercisesForms.map(f => f.exerciseId);
       const newIds = ids.filter(id => !existingIds.includes(id) && exercises.some(ex => ex.id === id));
       
@@ -77,9 +74,9 @@ export default function EditTemplatePage() {
         }));
         
         setExercisesForms(prev => [...prev, ...newExerciseForms]);
+        toast.success(`${newIds.length} exercises added!`);
       }
       
-      // Očisti URL
       router.replace(`/templates/${params.id}/edit`, { scroll: false });
     }
   }, [searchParams, exercises, loading, router, params.id]);
@@ -111,6 +108,7 @@ export default function EditTemplatePage() {
 
   const removeExercise = (index: number) => {
     setExercisesForms(exercisesForms.filter((_, i) => i !== index));
+    toast.info('Exercise removed');
   };
 
   const updateExercise = (index: number, field: string, value: any) => {
@@ -153,25 +151,24 @@ export default function EditTemplatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!name.trim()) {
-      setError('Template name is required');
+      toast.error('Template name is required');
       return;
     }
 
     if (exercisesForms.length === 0) {
-      setError('Add at least one exercise');
+      toast.error('Add at least one exercise');
       return;
     }
 
     for (let i = 0; i < exercisesForms.length; i++) {
       if (!exercisesForms[i].exerciseId) {
-        setError(`Select an exercise for exercise #${i + 1}`);
+        toast.error(`Select an exercise for exercise #${i + 1}`);
         return;
       }
       if (exercisesForms[i].sets.length === 0) {
-        setError(`Add at least one set for exercise #${i + 1}`);
+        toast.error(`Add at least one set for exercise #${i + 1}`);
         return;
       }
     }
@@ -182,9 +179,10 @@ export default function EditTemplatePage() {
         description,
         exercises: exercisesForms,
       });
+      toast.success('Template updated successfully!');
       router.push(`/templates/${params.id}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update template');
+      toast.error(err.response?.data?.message || 'Failed to update template');
     }
   };
 
@@ -219,19 +217,6 @@ export default function EditTemplatePage() {
         </h1>
         <p className="text-gray-400 text-lg">Update your workout routine</p>
       </div>
-
-      {/* Error Alert */}
-      {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-xl flex items-start gap-3">
-          <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
-          <div>
-            <h4 className="font-semibold mb-1">Error</h4>
-            <p>{error}</p>
-          </div>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}

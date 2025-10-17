@@ -4,44 +4,46 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
+import { useToast } from '@/hooks/useToast';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isLoading } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    username: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-  });
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
       return;
     }
 
-    if (formData.username.length < 3) {
-      setError('Username must be at least 3 characters long');
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
     try {
-      await register(formData);
+      await register({
+        email,
+        username,
+        password,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+      });
+      toast.success('Welcome to Gymbro! 🎉');
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
     }
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
   };
 
   return (
@@ -62,25 +64,37 @@ export default function RegisterPage() {
         {/* Register Card */}
         <div className="card">
           <h2 className="text-3xl font-bold text-white mb-6 text-center">Create Account</h2>
-          
-          {error && (
-            <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-xl mb-6 flex items-start gap-3">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <span>{error}</span>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-300 font-semibold mb-2">First Name</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="input-field"
+                  placeholder="John"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 font-semibold mb-2">Last Name</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="input-field"
+                  placeholder="Doe"
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="block text-gray-300 font-semibold mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-gray-300 font-semibold mb-2">Email</label>
               <input
                 type="email"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="input-field"
                 placeholder="your.email@example.com"
                 required
@@ -89,35 +103,28 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-gray-300 font-semibold mb-2">
-                Username <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-gray-300 font-semibold mb-2">Username</label>
               <input
                 type="text"
-                value={formData.username}
-                onChange={(e) => handleChange('username', e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="input-field"
-                placeholder="Choose a username"
+                placeholder="johndoe"
                 required
-                minLength={3}
                 autoComplete="username"
               />
-              <p className="text-gray-500 text-xs mt-1">At least 3 characters</p>
             </div>
 
             <div>
-              <label className="block text-gray-300 font-semibold mb-2">
-                Password <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-gray-300 font-semibold mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="input-field pr-12"
-                  placeholder="Create a strong password"
+                  placeholder="Create a password"
                   required
-                  minLength={6}
                   autoComplete="new-password"
                 />
                 <button
@@ -137,42 +144,26 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
-              <p className="text-gray-500 text-xs mt-1">At least 6 characters</p>
+              <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-300 font-semibold mb-2">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.firstName}
-                  onChange={(e) => handleChange('firstName', e.target.value)}
-                  className="input-field"
-                  placeholder="John"
-                  autoComplete="given-name"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 font-semibold mb-2">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.lastName}
-                  onChange={(e) => handleChange('lastName', e.target.value)}
-                  className="input-field"
-                  placeholder="Doe"
-                  autoComplete="family-name"
-                />
-              </div>
+            <div>
+              <label className="block text-gray-300 font-semibold mb-2">Confirm Password</label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="input-field"
+                placeholder="Confirm your password"
+                required
+                autoComplete="new-password"
+              />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full py-4 text-lg mt-6"
+              className="btn-primary w-full py-4 text-lg"
             >
               {isLoading ? (
                 <>
@@ -197,28 +188,6 @@ export default function RegisterPage() {
             </p>
           </div>
         </div>
-
-        {/* Benefits */}
-        {/* <div className="mt-8 space-y-3">
-          <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200 flex items-center gap-3">
-            <div className="bg-primary-500/10 p-2 rounded-lg">
-              <Icons.Check className="w-5 h-5 text-primary-500" />
-            </div>
-            <span className="text-gray-300">Track unlimited workouts</span>
-          </div>
-          <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200 flex items-center gap-3">
-            <div className="bg-primary-500/10 p-2 rounded-lg">
-              <Icons.Check className="w-5 h-5 text-primary-500" />
-            </div>
-            <span className="text-gray-300">Create custom templates</span>
-          </div>
-          <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200 flex items-center gap-3">
-            <div className="bg-primary-500/10 p-2 rounded-lg">
-              <Icons.Check className="w-5 h-5 text-primary-500" />
-            </div>
-            <span className="text-gray-300">Monitor your progress</span>
-          </div>
-        </div> */}
       </div>
     </div>
   );

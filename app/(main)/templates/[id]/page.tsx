@@ -6,6 +6,8 @@ import { useWorkout } from '@/hooks/useWorkout';
 import { workoutApi } from '@/lib/api';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
+import { Modal } from '@/components/Modal';
+import { useToast } from '@/hooks/useToast';
 
 export default function TemplateDetailPage() {
   const params = useParams();
@@ -13,6 +15,9 @@ export default function TemplateDetailPage() {
   const { currentTemplate, isLoading, fetchTemplate, deleteTemplate } = useTemplates();
   const { startWorkout, isLoading: starting } = useWorkout();
   const [deleting, setDeleting] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [hasWorkouts, setHasWorkouts] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (params.id) {
@@ -24,64 +29,45 @@ export default function TemplateDetailPage() {
     if (!currentTemplate) return;
     try {
       await startWorkout(currentTemplate.id);
+      toast.success('Workout started successfully!');
       router.push('/workouts');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to start workout';
-      alert(message);
+      toast.error(message);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = async () => {
+    if (!currentTemplate) return;
+    
+    try {
+      const workouts = await workoutApi.getAll();
+      const hasHistory = workouts.data.some(w => w.workoutTemplateId === currentTemplate.id);
+      setHasWorkouts(hasHistory);
+      setModalOpen(true);
+    } catch (error) {
+      toast.error('Failed to check workout history');
+    }
+  };
+
+  const confirmDelete = async () => {
     if (!currentTemplate) return;
     setDeleting(true);
     
     try {
-      // Prvo proveri da li template ima workout sessions
-      const workouts = await workoutApi.getAll();
-      const hasWorkouts = workouts.data.some(w => w.workoutTemplateId === currentTemplate.id);
-      
-      if (hasWorkouts) {
-        const confirmDelete = confirm(
-          `⚠️ WARNING: "${currentTemplate.name}" has workout history!\n\n` +
-          `This template has been used in workout sessions. ` +
-          `Deleting it may affect your workout history.\n\n` +
-          `Are you ABSOLUTELY SURE you want to delete it?`
-        );
-        
-        if (!confirmDelete) {
-          setDeleting(false);
-          return;
-        }
-      } else {
-        const confirmDelete = confirm(
-          `Are you sure you want to delete "${currentTemplate.name}"?\n\n` +
-          `This action cannot be undone.`
-        );
-        
-        if (!confirmDelete) {
-          setDeleting(false);
-          return;
-        }
-      }
-
       await deleteTemplate(currentTemplate.id);
-      alert('✅ Template deleted successfully!');
+      toast.success('Template deleted successfully!');
       router.push('/templates');
-      
     } catch (error: any) {
-      console.error('Delete failed:', error);
-      
       let errorMsg = 'Failed to delete template.';
       
       if (error.response?.status === 500) {
-        errorMsg = '❌ Cannot delete template!\n\n' +
-          'This template is being used by workout sessions. ' +
-          'You need to delete those workout sessions first, or contact support.';
+        errorMsg = 'Cannot delete template! This template is being used by workout sessions. You need to delete those workout sessions first.';
       } else if (error.response?.data?.message) {
         errorMsg = error.response.data.message;
       }
       
-      alert(errorMsg);
+      toast.error(errorMsg, 7000);
       setDeleting(false);
     }
   };
@@ -111,10 +97,25 @@ export default function TemplateDetailPage() {
   }
 
   const totalSets = currentTemplate.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
-  const estimatedTime = totalSets * 3; // Rough estimate: 3 mins per set
+  const estimatedTime = totalSets * 3;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={confirmDelete}
+        title={hasWorkouts ? "⚠️ Warning: Template Has History" : "Delete Template"}
+        message={
+          hasWorkouts
+            ? `"${currentTemplate.name}" has workout history!\n\nThis template has been used in workout sessions. Deleting it may affect your workout history.\n\nAre you ABSOLUTELY SURE you want to delete it?`
+            : `Are you sure you want to delete "${currentTemplate.name}"?\n\nThis action cannot be undone.`
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        type={hasWorkouts ? "danger" : "warning"}
+      />
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
         <div className="flex-1">
@@ -182,7 +183,7 @@ export default function TemplateDetailPage() {
           </Link>
 
           <button
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={deleting}
             className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50"
           >

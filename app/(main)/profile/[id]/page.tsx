@@ -99,7 +99,7 @@ export default function ProfilePage() {
             </div>
 
             {isOwnProfile && (
-              <Link href="/settings" className="text-center w-full btn-primary">
+              <Link href="/settings" className="text-center w-full md:w-auto btn-primary">
                 Edit Profile
               </Link>
             )}

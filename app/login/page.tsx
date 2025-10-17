@@ -4,23 +4,25 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
+import { useToast } from '@/hooks/useToast';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    
     try {
       await login(email, password);
+      toast.success('Welcome back');
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      toast.error(err.response?.data?.message || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -42,15 +44,6 @@ export default function LoginPage() {
         {/* Login Card */}
         <div className="card">
           <h2 className="text-3xl font-bold text-white mb-6 text-center">Sign In</h2>
-          
-          {error && (
-            <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-xl mb-6 flex items-start gap-3">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <span>{error}</span>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -125,25 +118,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-
-        {/* Quick Stats */}
-        {/* <div className="mt-8 grid md:grid-cols-3 gap-4 text-center">
-          <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200">
-            <Icons.Fire className="w-6 h-6 text-primary-500 mx-auto mb-2" />
-            <div className="text-white font-bold">Track</div>
-            <div className="text-gray-400 text-xs">Your Progress</div>
-          </div>
-          <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200">
-            <Icons.Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-            <div className="text-white font-bold">Achieve</div>
-            <div className="text-gray-400 text-xs">Your Goals</div>
-          </div>
-          <div className="bg-dark-300/50 backdrop-blur-sm rounded-xl p-4 border border-dark-200">
-            <Icons.Target className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-            <div className="text-white font-bold">Build</div>
-            <div className="text-gray-400 text-xs">Your Strength</div>
-          </div>
-        </div> */}
       </div>
     </div>
   );
