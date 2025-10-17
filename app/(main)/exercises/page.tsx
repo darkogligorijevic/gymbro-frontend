@@ -106,7 +106,7 @@ export default function ExercisesPage() {
       {/* Selection Mode Actions */}
       {isSelectionMode && (
         <div className="card bg-gradient-to-r from-primary-600 to-orange-600 sticky top-20 z-40">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-white mb-1">
                 {selectedExerciseIds.length} exercise{selectedExerciseIds.length !== 1 ? 's' : ''} selected
@@ -123,7 +123,7 @@ export default function ExercisesPage() {
               <button
                 onClick={handleConfirmSelection}
                 disabled={selectedExerciseIds.length === 0}
-                className="flex-1 md:flex-none bg-white text-primary-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="md:flex-none bg-white text-primary-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Icons.Check className="w-5 h-5 inline mr-2" />
                 Confirm Selection

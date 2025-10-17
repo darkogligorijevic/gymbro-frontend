@@ -251,7 +251,7 @@ export default function NewTemplatePage() {
                 <span className="text-gray-400 text-lg">({exercisesForms.length})</span>
               )}
             </h2>
-            <div className="flex gap-2">
+            <div className="hidden sm:flex gap-2">
               <button
                 type="button"
                 onClick={handleBulkAddExercises}

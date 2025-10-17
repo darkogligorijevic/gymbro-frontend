@@ -90,7 +90,7 @@ export default function TemplatesPage() {
           </h1>
           <p className="text-gray-400 text-lg">Create and manage your workout routines</p>
         </div>
-        <Link href="/templates/new" className="btn-primary whitespace-nowrap">
+        <Link href="/templates/new" className="btn-primary whitespace-nowrap text-center">
           <Icons.Plus className="w-5 h-5 inline mr-2" />
           Create Template
         </Link>

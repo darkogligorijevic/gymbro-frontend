@@ -334,7 +334,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Icons.Calendar className="w-8 h-8 text-primary-500" />
-            <h2 className="text-2xl font-bold text-white">Activity Calendar</h2>
+            <h2 className="text-sm sm:text-xl md:text-2xl font-bold text-white">Activity Calendar</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -343,7 +343,7 @@ export default function DashboardPage() {
             >
               <Icons.ArrowLeft className="w-5 h-5 text-gray-400" />
             </button>
-            <span className="text-white font-semibold min-w-32 text-center">
+            <span className="text-white text-sm md:text-xl font-semibold min-w-32 text-center">
               {format(selectedMonth, 'MMMM yyyy')}
             </span>
             <button
