@@ -16,6 +16,7 @@ export interface Exercise {
   name: string;
   description?: string;
   muscleGroup: MuscleGroup;
+  targetMuscles?: string[];
   videoUrl?: string;
   isActive: boolean;
   createdAt: string;

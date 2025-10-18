@@ -24,6 +24,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
   Cell,
 } from "recharts";
 
@@ -48,8 +54,7 @@ export default function DashboardPage() {
     return diff < 7 * 24 * 60 * 60 * 1000;
   }).length;
 
-  // Funkcija za pronalaženje PRova
-  // PR-ovi: najveća podignuta kilaža po vežbi (reps se ignorišu)
+  // Personal Records
   const personalRecords = useMemo(() => {
     const prMap = new Map<
       string,
@@ -64,10 +69,9 @@ export default function DashboardPage() {
           const w = Number(set.actualWeight ?? 0);
           if (w <= 0) return;
 
-          const key = exercise.exercise.name; // po potrebi: .trim().toLowerCase()
+          const key = exercise.exercise.name;
           const current = prMap.get(key);
 
-          // Ako je kilaža veća — ili ista ali je sesija novija — ažuriraj PR
           if (
             !current ||
             w > current.weight ||
@@ -91,7 +95,7 @@ export default function DashboardPage() {
       .slice(0, 3);
   }, [workoutHistory]);
 
-  // Najčešće vežbe
+  // Most Frequent Exercises
   const mostFrequentExercises = useMemo(() => {
     const exerciseCount = new Map<string, { count: number; name: string }>();
 
@@ -113,9 +117,9 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [workoutHistory]);
 
-  // Workouts per week (poslednjih 8 nedelja)
+  // Weekly Progress Data
   const weeklyWorkouts = useMemo(() => {
-    const weeks: { week: string; count: number; volume: number }[] = [];
+    const weeks: { week: string; workouts: number; volume: number; sets: number }[] = [];
     const now = new Date();
 
     for (let i = 7; i >= 0; i--) {
@@ -128,7 +132,6 @@ export default function DashboardPage() {
         return date >= weekStart && date <= weekEnd;
       });
 
-      // Računamo volume (total weight lifted)
       const volume = workoutsInWeek.reduce((sum, workout) => {
         const workoutVolume = workout.exercises.reduce((exSum, ex) => {
           return (
@@ -141,17 +144,40 @@ export default function DashboardPage() {
         return sum + workoutVolume;
       }, 0);
 
+      const totalSets = workoutsInWeek.reduce((sum, workout) => {
+        return sum + workout.exercises.reduce((exSum, ex) => {
+          return exSum + ex.sets.filter(s => s.isCompleted).length;
+        }, 0);
+      }, 0);
+
       weeks.push({
         week: format(weekStart, "MMM dd"),
-        count: workoutsInWeek.length,
+        workouts: workoutsInWeek.length,
         volume: Math.round(volume),
+        sets: totalSets,
       });
     }
 
     return weeks;
   }, [workoutHistory]);
 
-  // Kalendar podataka
+  // Muscle Group Distribution
+  const muscleGroupData = useMemo(() => {
+    const muscleGroups = new Map<string, number>();
+
+    workoutHistory.forEach((session) => {
+      session.exercises.forEach((exercise) => {
+        const group = exercise.exercise.muscleGroup;
+        muscleGroups.set(group, (muscleGroups.get(group) || 0) + 1);
+      });
+    });
+
+    return Array.from(muscleGroups.entries())
+      .map(([name, value]) => ({ name: name.replace('_', ' ').toUpperCase(), value }))
+      .sort((a, b) => b.value - a.value);
+  }, [workoutHistory]);
+
+  // Calendar Data
   const calendarData = useMemo(() => {
     const start = startOfMonth(selectedMonth);
     const end = endOfMonth(selectedMonth);
@@ -205,7 +231,24 @@ export default function DashboardPage() {
     return `${templateName} - ${date}`;
   };
 
-  const maxWeeklyCount = Math.max(...weeklyWorkouts.map((w) => w.count), 1);
+  const COLORS = ['#FF6B35', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+
+  // Custom Tooltip for Charts
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-dark-400 border border-primary-500 rounded-lg p-3 shadow-xl">
+          <p className="text-white font-bold mb-1">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name}: {entry.value.toLocaleString()}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-8">
@@ -285,6 +328,150 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      {/* Weekly Progress - Enhanced with Multiple Charts */}
+      <div className="card">
+        <div className="flex items-center gap-3 mb-6">
+          <Icons.Target className="w-8 h-8 text-primary-500" />
+          <h2 className="text-2xl font-bold text-white">Weekly Progress</h2>
+        </div>
+
+        {/* Volume & Workouts Line Chart */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-white mb-4">Volume & Workout Frequency</h3>
+          <div className="w-full h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weeklyWorkouts}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  dataKey="week" 
+                  stroke="#9ca3af"
+                  style={{ fontSize: '12px' }}
+                />
+                <YAxis 
+                  yAxisId="left"
+                  stroke="#9ca3af"
+                  style={{ fontSize: '12px' }}
+                  label={{ value: 'Volume (kg)', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  stroke="#9ca3af"
+                  style={{ fontSize: '12px' }}
+                  label={{ value: 'Workouts', angle: 90, position: 'insideRight', fill: '#9ca3af' }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="volume" 
+                  stroke="#FF6B35" 
+                  strokeWidth={3}
+                  name="Volume"
+                  dot={{ fill: '#FF6B35', r: 5 }}
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="workouts" 
+                  stroke="#3B82F6" 
+                  strokeWidth={3}
+                  name="Workouts"
+                  dot={{ fill: '#3B82F6', r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Sets Completed Bar Chart */}
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-4">Sets Completed</h3>
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weeklyWorkouts}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  dataKey="week" 
+                  stroke="#9ca3af"
+                  style={{ fontSize: '12px' }}
+                />
+                <YAxis 
+                  stroke="#9ca3af"
+                  style={{ fontSize: '12px' }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="sets" fill="#10B981" radius={[8, 8, 0, 0]} name="Sets" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Muscle Group Distribution */}
+      {muscleGroupData.length > 0 && (
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="card">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <Icons.Target className="w-7 h-7 text-primary-500" />
+              Muscle Group Focus
+            </h2>
+            <div className="w-full h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={muscleGroupData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(Number(percent) * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {muscleGroupData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="card">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <Icons.Dumbbell className="w-7 h-7 text-primary-500" />
+              Muscle Group Breakdown
+            </h2>
+            <div className="space-y-3">
+              {muscleGroupData.map((group, idx) => {
+                const total = muscleGroupData.reduce((sum, g) => sum + g.value, 0);
+                const percentage = ((group.value / total) * 100).toFixed(1);
+                
+                return (
+                  <div key={idx}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">{group.name}</span>
+                      <span className="text-gray-400">{group.value} exercises ({percentage}%)</span>
+                    </div>
+                    <div className="h-3 bg-dark-300 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ 
+                          width: `${percentage}%`,
+                          backgroundColor: COLORS[idx % COLORS.length]
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Personal Records & Most Frequent Exercises */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -410,7 +597,6 @@ export default function DashboardPage() {
             </div>
           ))}
 
-          {/* Padding za prvi dan meseca */}
           {Array.from({ length: startOfMonth(selectedMonth).getDay() }).map(
             (_, idx) => (
               <div key={`empty-${idx}`} />
@@ -461,45 +647,6 @@ export default function DashboardPage() {
             <div className="w-4 h-4 rounded bg-dark-300" />
             <span className="text-gray-400">Rest day</span>
           </div>
-        </div>
-      </div>
-
-      {/* Workouts Per Week Chart */}
-      <div className="card">
-        <div className="flex items-center gap-3 mb-6">
-          <Icons.Target className="w-8 h-8 text-blue-500" />
-          <h2 className="text-2xl font-bold text-white">Weekly Progress</h2>
-        </div>
-
-        <div className="space-y-4">
-          {weeklyWorkouts.map((week) => (
-            <div key={week.week}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-400 text-sm font-medium">
-                  {week.week}
-                </span>
-                <div className="flex items-center gap-4">
-                  <span className="text-white font-bold">
-                    {week.count} workouts
-                  </span>
-                  <span className="text-gray-400 text-sm">
-                    {week.volume.toLocaleString()} kg
-                  </span>
-                </div>
-              </div>
-              <div className="relative h-8 bg-dark-300 rounded-lg overflow-hidden">
-                <div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 to-orange-500 rounded-lg transition-all"
-                  style={{ width: `${(week.count / maxWeeklyCount) * 100}%` }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold z-10">
-                    {week.count > 0 && `${week.count}x`}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -570,14 +717,11 @@ export default function DashboardPage() {
                 onClick={() => router.push(`/workouts/${workout.id}`)}
                 className="card hover:border-primary-500/50 transition-all group cursor-pointer p-4"
               >
-                {/* Mobile Layout */}
                 <div className="flex items-start gap-3 sm:items-center">
-                  {/* Icon */}
                   <div className="bg-primary-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-primary-500/20 transition-colors flex-shrink-0">
                     <Icons.Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500" />
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <h3 className="text-white font-bold text-sm sm:text-lg mb-1 truncate">
                       {getSessionName(workout)}
@@ -594,7 +738,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Status & Arrow */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {workout.isWorkoutFinished && (
                       <div className="hidden sm:flex badge sm:bg-green-500/10 sm:text-green-500 sm:border sm:border-green-500/30">
@@ -602,7 +745,6 @@ export default function DashboardPage() {
                         <span className="hidden sm:inline">Completed</span>
                       </div>
                     )}
-                    {/* Green checkmark for mobile */}
                     {workout.isWorkoutFinished && (
                       <div className="sm:hidden w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
                         <Icons.Check className="w-4 h-4 text-green-500" />

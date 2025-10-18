@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usersApi } from '@/lib/api';
 import { Icons } from '@/components/Icons';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths } from 'date-fns';
 import type { UserProfile } from '@/lib/types';
 import Link from 'next/link';
 
@@ -15,6 +15,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   const id = params.id as string;
   const isOwnProfile = currentUser?.id === id;
@@ -66,6 +67,24 @@ export default function ProfilePage() {
   }
 
   const { user, stats, recentWorkouts } = profile;
+
+  // Calendar data
+  const calendarData = (() => {
+    const start = startOfMonth(selectedMonth);
+    const end = endOfMonth(selectedMonth);
+    const days = eachDayOfInterval({ start, end });
+
+    return days.map((day) => {
+      const workout = recentWorkouts.find((w) =>
+        isSameDay(new Date(w.date), day)
+      );
+      return {
+        date: day,
+        workout,
+        hasWorkout: !!workout,
+      };
+    });
+  })();
 
   return (
     <div className="space-y-8">
@@ -131,6 +150,105 @@ export default function ProfilePage() {
           </div>
           <h3 className="text-gray-400 text-sm font-semibold mb-2">This Week</h3>
           <p className="text-5xl font-bold text-white">{stats.thisWeekWorkouts}</p>
+        </div>
+      </div>
+
+      {/* Activity Calendar */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Icons.Calendar className="w-8 h-8 text-primary-500" />
+            <h2 className="text-sm md:text-2xl font-bold text-white">
+              Activity Calendar
+            </h2>
+          </div>
+          <div className="flex items-center sm:gap-2">
+            <button
+              onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
+              className="pl-2 md:p-2 hover:bg-dark-300 rounded-lg transition"
+            >
+              <Icons.ArrowLeft className="w-5 h-5 text-gray-400" />
+            </button>
+            <span className="text-white text-sm md:text-xl font-semibold min-w-28 md:min-w-32 text-center">
+              {format(selectedMonth, 'MMMM yyyy')}
+            </span>
+            <button
+              onClick={() => setSelectedMonth(new Date())}
+              className="px-3 py-1 bg-primary-500/10 text-primary-500 rounded-lg text-sm font-medium hover:bg-primary-500/20 transition"
+            >
+              Today
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div
+              key={day}
+              className="text-center text-gray-400 text-sm font-semibold py-2"
+            >
+              {day}
+            </div>
+          ))}
+
+          {/* Padding for first day of month */}
+          {Array.from({ length: startOfMonth(selectedMonth).getDay() }).map(
+            (_, idx) => (
+              <div key={`empty-${idx}`} />
+            )
+          )}
+
+          {calendarData.map(({ date, workout, hasWorkout }) => {
+            const isToday = isSameDay(date, new Date());
+
+            return (
+              <div
+                key={date.toISOString()}
+                onClick={() => {
+                  // Only allow clicking on own workouts
+                  if (workout && isOwnProfile) {
+                    router.push(`/workouts/${workout.id}`);
+                  }
+                }}
+                className={`
+                  aspect-square rounded-lg p-2 transition-all
+                  ${
+                    hasWorkout
+                      ? `bg-green-500/20 border border-green-500/30 ${
+                          isOwnProfile
+                            ? 'hover:bg-green-500/30 cursor-pointer'
+                            : 'cursor-default'
+                        }`
+                      : 'bg-dark-300 hover:bg-dark-200'
+                  }
+                  ${isToday ? 'ring-2 ring-primary-500' : ''}
+                `}
+              >
+                <div className="text-white text-sm font-semibold">
+                  {format(date, 'd')}
+                </div>
+                {hasWorkout && workout && (
+                  <div className="mt-1 hidden md:block">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mx-auto" />
+                    <div className="text-xs text-green-400 text-center mt-1">
+                      {workout.duration}m
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-4 mt-6 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-500/20 border border-green-500/30" />
+            <span className="text-gray-400">Workout completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-dark-300" />
+            <span className="text-gray-400">Rest day</span>
+          </div>
         </div>
       </div>
 
@@ -200,79 +318,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-
-      {/* Recent Workouts */}
-      <div className="card">
-        <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-          <Icons.Calendar className="w-8 h-8 text-primary-500" />
-          Recent Activity
-        </h2>
-
-        {recentWorkouts.length === 0 ? (
-          <div className="text-center py-12">
-            <Icons.Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No recent workouts</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-      {recentWorkouts.slice(0, 10).map((workout) => {
-        const workoutName = workout.templateName 
-          ? `${workout.templateName}`
-          : 'Workout';
-        
-        return (
-          <div
-            key={workout.id}
-            onClick={() => router.push(`/workouts/${workout.id}`)}
-            className="card hover:border-primary-500/50 transition-all cursor-pointer group p-3 sm:p-4"
-          >
-            <div className="flex items-start gap-3 sm:items-center">
-              {/* Icon */}
-              <div className="bg-green-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-green-500/20 transition-colors flex-shrink-0">
-                <Icons.Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
-              </div>
-              
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-sm sm:text-lg truncate">
-                  {workoutName}
-                </h3>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 mt-1">
-                  <span className="flex items-center gap-1">
-                    <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {format(new Date(workout.date), 'MMM dd, yyyy')}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {workout.duration} min
-                  </span>
-                </div>
-              </div>
-              
-              {/* Status & Arrow */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {workout.isCompleted && (
-                  <>
-                    {/* Desktop badge */}
-                    <div className="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-500 border border-green-500/30">
-                      <Icons.Check className="w-4 h-4 mr-1" />
-                      Completed
-                    </div>
-                    {/* Mobile checkmark */}
-                    <div className="sm:hidden w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <Icons.Check className="w-4 h-4 text-green-500" />
-                    </div>
-                  </>
-                )}
-                <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-        )}
-      </div>
 
       {/* Empty State for New Users */}
       {stats.totalWorkouts === 0 && (

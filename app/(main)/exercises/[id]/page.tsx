@@ -133,7 +133,6 @@ export default function ExerciseDetailPage() {
             allWeights.push(weight);
             allRepsCount.push(reps);
 
-            // PR je najveća težina ikada podignuta
             if (weight > pr.weight) {
               pr = {
                 weight: weight,
@@ -188,7 +187,6 @@ export default function ExerciseDetailPage() {
     )
     .slice(0, 10);
 
-  // Prepare chart data
   const chartData = recentWorkouts
     .slice()
     .reverse()
@@ -211,7 +209,6 @@ export default function ExerciseDetailPage() {
     })
     .filter((d): d is { date: string; weight: number; fullDate: string } => d !== null && d.weight > 0);
 
-  // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -613,6 +610,7 @@ export default function ExerciseDetailPage() {
         </h2>
 
         <div className="grid md:grid-cols-2 gap-4">
+          {/* Primary Target */}
           <div className="p-6 bg-gradient-to-br from-primary-500/20 to-orange-500/20 rounded-xl border border-primary-500/30">
             <div className="flex items-center gap-3 mb-3">
               <div
@@ -632,19 +630,39 @@ export default function ExerciseDetailPage() {
             </p>
           </div>
 
+          {/* Secondary Muscles */}
           <div className="p-6 bg-dark-300 rounded-xl border border-dark-200">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-lg bg-dark-400 flex items-center justify-center">
-                <Icons.Dumbbell className="w-6 h-6 text-gray-500" />
+                <Icons.Dumbbell className="w-6 h-6 text-primary-500" />
               </div>
               <div>
                 <div className="text-sm text-gray-400">Secondary Muscles</div>
-                <div className="text-xl font-bold text-white">Coming Soon</div>
+                <div className="text-xl font-bold text-white">
+                  {currentExercise.targetMuscles && currentExercise.targetMuscles.length > 0
+                    ? `${currentExercise.targetMuscles.length} muscles`
+                    : 'None'}
+                </div>
               </div>
             </div>
-            <p className="text-gray-400 text-sm">
-              Additional muscle groups engaged during this exercise
-            </p>
+            {currentExercise.targetMuscles && currentExercise.targetMuscles.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {currentExercise.targetMuscles.map((muscle) => {
+                  return (
+                    <div
+                      key={muscle}
+                      className={`badge text-white border-0`}
+                    >
+                      {muscle}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">
+                This exercise primarily targets one muscle group
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -661,33 +679,6 @@ export default function ExerciseDetailPage() {
               <Icons.Check className="w-5 h-5 text-primary-500" />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Proper Form</h3>
-              <p className="text-gray-400 text-sm">
-                Focus on controlled movements and maintain proper form
-                throughout each rep to maximize effectiveness and prevent
-                injury.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-500/20 flex items-center justify-center">
-              <Icons.Clock className="w-5 h-5 text-primary-500" />
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-1">Rest Periods</h3>
-              <p className="text-gray-400 text-sm">
-                Allow 60-90 seconds of rest between sets for optimal recovery
-                and performance.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-500/20 flex items-center justify-center">
-              <Icons.Lightning className="w-5 h-5 text-primary-500" />
-            </div>
-            <div>
               <h3 className="text-white font-semibold mb-1">
                 Progressive Overload
               </h3>
@@ -701,4 +692,4 @@ export default function ExerciseDetailPage() {
       </div>
     </div>
   );
-}
+} 
