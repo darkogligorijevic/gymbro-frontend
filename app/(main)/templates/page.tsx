@@ -101,7 +101,7 @@ export default function TemplatesPage() {
       {isLoading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="card loading-shimmer h-64"></div>
+            <div key={i} className="card loading-shimmer h-80"></div>
           ))}
         </div>
       ) : templates.length === 0 ? (
@@ -131,23 +131,26 @@ export default function TemplatesPage() {
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="card-hover group relative border border-gray-900 py-6 px-4 rounded-2xl overflow-hidden hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20"
+                className="card-hover group relative border border-gray-900 rounded-2xl overflow-hidden hover:border-primary-500 transition-all shadow-md hover:shadow-primary-500/20 flex flex-col h-full"
               >
-                {/* Template Content */}
-                <div className="mb-4">
+                {/* Content Section - Fixed Height */}
+                <div className="p-6 flex-1 flex flex-col">
+                  {/* Header */}
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-2xl font-bold text-white group-hover:text-primary-500 transition-colors">
+                    <h3 className="text-2xl font-bold text-white group-hover:text-primary-500 transition-colors line-clamp-2 flex-1">
                       {template.name}
                     </h3>
-                    <div className="bg-primary-500/10 p-2 rounded-lg">
+                    <div className="bg-primary-500/10 p-2 rounded-lg flex-shrink-0 ml-2">
                       <Icons.Dumbbell className="w-5 h-5 text-primary-500" />
                     </div>
                   </div>
                   
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+                  {/* Description - Fixed Height */}
+                  <p className="text-gray-400 text-sm mb-4 line-clamp-2 h-10">
                     {template.description || 'No description'}
                   </p>
 
+                  {/* Stats */}
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                     <Icons.Target className="w-4 h-4" />
                     <span>{template.exercises.length} exercises</span>
@@ -157,51 +160,54 @@ export default function TemplatesPage() {
                     </span>
                   </div>
 
-                  {/* Exercise Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  {/* Exercise Tags - Fixed Height */}
+                  <div className="flex flex-wrap gap-2 mb-4 min-h-[2.5rem]">
                     {template.exercises.slice(0, 3).map((ex, i) => (
                       <span
                         key={i}
-                        className="badge bg-dark-200 text-gray-300 border border-dark-100"
+                        className="badge bg-dark-200 text-gray-300 border border-dark-100 text-xs"
                       >
                         {ex.exercise?.name}
                       </span>
                     ))}
                     {template.exercises.length > 3 && (
-                      <span className="badge bg-primary-500/10 text-primary-500 border border-primary-500/30">
+                      <span className="badge bg-primary-500/10 text-primary-500 border border-primary-500/30 text-xs">
                         +{template.exercises.length - 3} more
                       </span>
                     )}
                   </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Link
-                    href={`/templates/${template.id}`}
-                    className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold text-center transition-all transform hover:scale-105"
-                  >
-                    View Details
-                  </Link>
-                  <Link
-                    href={`/templates/${template.id}/edit`}
-                    className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-4 py-3 rounded-xl transition-all"
-                    title="Edit template"
-                  >
-                    <Icons.Edit className="w-5 h-5" />
-                  </Link>
-                  <button
-                    onClick={() => handleDeleteClick(template.id, template.name)}
-                    disabled={deletingId === template.id}
-                    className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-3 rounded-xl transition-all disabled:opacity-50"
-                    title="Delete template"
-                  >
-                    {deletingId === template.id ? (
-                      <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Icons.Trash className="w-5 h-5" />
-                    )}
-                  </button>
+                  {/* Spacer to push actions to bottom */}
+                  <div className="flex-1"></div>
+
+                  {/* Actions - Fixed at Bottom */}
+                  <div className="flex gap-2 mt-auto">
+                    <Link
+                      href={`/templates/${template.id}`}
+                      className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold text-center transition-all transform hover:scale-105"
+                    >
+                      View Details
+                    </Link>
+                    <Link
+                      href={`/templates/${template.id}/edit`}
+                      className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-4 py-3 rounded-xl transition-all"
+                      title="Edit template"
+                    >
+                      <Icons.Edit className="w-5 h-5" />
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteClick(template.id, template.name)}
+                      disabled={deletingId === template.id}
+                      className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-3 rounded-xl transition-all disabled:opacity-50"
+                      title="Delete template"
+                    >
+                      {deletingId === template.id ? (
+                        <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <Icons.Trash className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

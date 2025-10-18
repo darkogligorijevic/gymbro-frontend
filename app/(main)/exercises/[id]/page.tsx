@@ -5,7 +5,7 @@ import { useExercises } from "@/hooks/useExercises";
 import { useWorkout } from "@/hooks/useWorkout";
 import { Icons } from "@/components/Icons";
 import { MuscleGroup } from "@/lib/types";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, ComposedChart } from 'recharts';
 
 const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> =
   {
@@ -187,7 +187,8 @@ export default function ExerciseDetailPage() {
     )
     .slice(0, 10);
 
-  const chartData = recentWorkouts
+  // Progress Data (Max Weight per Workout)
+  const progressData = recentWorkouts
     .slice()
     .reverse()
     .map((session) => {
@@ -200,21 +201,61 @@ export default function ExerciseDetailPage() {
       if (completedSets.length === 0) return null;
 
       const maxWeight = Math.max(...completedSets.map((s) => s.actualWeight || 0));
+      const totalReps = completedSets.reduce((sum, s) => sum + (s.actualReps || 0), 0);
       
       return {
         date: formatShortDate(session.clockIn),
         weight: maxWeight,
+        reps: totalReps,
         fullDate: formatFullDate(session.clockIn),
       };
     })
-    .filter((d): d is { date: string; weight: number; fullDate: string } => d !== null && d.weight > 0);
+    .filter((d): d is { date: string; weight: number; reps: number; fullDate: string } => d !== null && d.weight > 0);
+
+  // Volume Progression Data
+  const volumeData = recentWorkouts
+    .slice()
+    .reverse()
+    .map((session) => {
+      const exerciseInSession = session.exercises.find(
+        (ex) => ex.exerciseId === currentExercise.id
+      );
+      if (!exerciseInSession) return null;
+
+      const completedSets = exerciseInSession.sets.filter(
+        (s) => s.isCompleted
+      );
+      const totalVolume = completedSets.reduce(
+        (sum, set) =>
+          sum +
+          (Number(set.actualWeight) || 0) *
+            (Number(set.actualReps) || 0),
+        0
+      );
+      const numSets = completedSets.length;
+
+      return {
+        date: formatShortDate(session.clockIn),
+        volume: totalVolume,
+        sets: numSets,
+        fullDate: formatFullDate(session.clockIn),
+      };
+    })
+    .filter(
+      (d): d is { date: string; volume: number; sets: number; fullDate: string } =>
+        d !== null && d.volume > 0
+    );
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-dark-400 border border-primary-500 rounded-lg p-3 shadow-xl">
-          <p className="text-white font-bold text-lg">{payload[0].value} kg</p>
-          <p className="text-gray-400 text-sm">{payload[0].payload.fullDate}</p>
+          <p className="text-white font-bold text-sm mb-1">{payload[0].payload.fullDate}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name}: {entry.value.toLocaleString()}{entry.name.includes('Weight') ? ' kg' : ''}
+            </p>
+          ))}
         </div>
       );
     }
@@ -228,7 +269,7 @@ export default function ExerciseDetailPage() {
         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
       >
         <Icons.ArrowLeft className="w-5 h-5" />
-        <span>Back to Exercises</span>
+        <span>Back</span>
       </button>
 
       <div className="card">
@@ -343,146 +384,126 @@ export default function ExerciseDetailPage() {
 
       {stats.totalSets > 0 && recentWorkouts.length > 0 && (
         <>
-          <div className="card">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Icons.Fire className="w-7 h-7 text-primary-500" />
-              Volume Progression Chart
-            </h2>
-
-            {(() => {
-              const volumeData = recentWorkouts
-                .slice()
-                .reverse()
-                .map((session) => {
-                  const exerciseInSession = session.exercises.find(
-                    (ex) => ex.exerciseId === currentExercise.id
-                  );
-                  if (!exerciseInSession) return null;
-
-                  const completedSets = exerciseInSession.sets.filter(
-                    (s) => s.isCompleted
-                  );
-                  const totalVolume = completedSets.reduce(
-                    (sum, set) =>
-                      sum +
-                      (Number(set.actualWeight) || 0) *
-                        (Number(set.actualReps) || 0),
-                    0
-                  );
-
-                  return {
-                    date: formatShortDate(session.clockIn),
-                    volume: totalVolume,
-                    fullDate: formatFullDate(session.clockIn),
-                  };
-                })
-                .filter(
-                  (d): d is { date: string; volume: number; fullDate: string } =>
-                    d !== null && d.volume > 0
-                );
-
-              const CustomVolumeTooltip = ({ active, payload }: any) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-dark-400 border border-primary-500 rounded-lg p-3 shadow-xl">
-                      <p className="text-white font-bold text-lg">{payload[0].value.toLocaleString()} kg</p>
-                      <p className="text-gray-400 text-sm">{payload[0].payload.fullDate}</p>
-                    </div>
-                  );
-                }
-                return null;
-              };
-
-              if (volumeData.length === 0) {
-                return (
-                  <div className="text-center py-8 text-gray-400">
-                    Not enough data to display chart
-                  </div>
-                );
-              }
-
-              return (
-                <>
-                  <div className="w-full h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={volumeData}>
-                        <defs>
-                          <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#f97316" stopOpacity={0.1}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis 
-                          dataKey="date" 
-                          stroke="#9ca3af"
-                          style={{ fontSize: '12px' }}
-                        />
-                        <YAxis 
-                          stroke="#9ca3af"
-                          style={{ fontSize: '12px' }}
-                          label={{ value: 'Volume (kg)', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
-                        />
-                        <Tooltip content={<CustomVolumeTooltip />} />
-                        <Area 
-                          type="monotone" 
-                          dataKey="volume" 
-                          stroke="#f97316" 
-                          strokeWidth={3}
-                          fillOpacity={1} 
-                          fill="url(#colorVolume)" 
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="mt-4 flex items-center justify-center gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-gradient-to-r from-primary-600 to-orange-500"></div>
-                      <span className="text-gray-400">Total Volume per Workout</span>
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-
+          {/* Strength Progress Chart */}
           <div className="card">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
               <Icons.Trophy className="w-7 h-7 text-primary-500" />
-              Max Weight Progression
+              Strength Progress
             </h2>
-
-            {chartData.length > 0 ? (
+            {progressData.length > 0 ? (
               <div className="w-full h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
+                  <ComposedChart data={progressData}>
                     <defs>
                       <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#FF6B35" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#FF6B35" stopOpacity={0.05}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis 
                       dataKey="date" 
                       stroke="#9ca3af"
-                      style={{ fontSize: '12px' }}
+                      style={{ fontSize: '11px' }}
                     />
                     <YAxis 
+                      yAxisId="left"
                       stroke="#9ca3af"
-                      style={{ fontSize: '12px' }}
-                      label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                      style={{ fontSize: '11px' }}
+                      width={45}
+                    />
+                    <YAxis 
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#9ca3af"
+                      style={{ fontSize: '11px' }}
+                      width={40}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Area 
+                      yAxisId="left"
                       type="monotone" 
                       dataKey="weight" 
-                      stroke="#f97316" 
+                      stroke="#FF6B35" 
                       strokeWidth={3}
                       fillOpacity={1} 
-                      fill="url(#colorWeight)" 
+                      fill="url(#colorWeight)"
+                      name="Max Weight"
                     />
-                  </AreaChart>
+                    <Line 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="reps" 
+                      stroke="#10B981" 
+                      strokeWidth={2}
+                      dot={{ fill: '#10B981', r: 4 }}
+                      name="Total Reps"
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                Not enough data to display chart
+              </div>
+            )}
+          </div>
+
+          {/* Volume & Sets Chart */}
+          <div className="card">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <Icons.Fire className="w-7 h-7 text-primary-500" />
+              Volume & Sets Progression
+            </h2>
+
+            {volumeData.length > 0 ? (
+              <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={volumeData}>
+                    <defs>
+                      <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.05}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#9ca3af"
+                      style={{ fontSize: '11px' }}
+                    />
+                    <YAxis 
+                      yAxisId="left"
+                      stroke="#9ca3af"
+                      style={{ fontSize: '11px' }}
+                      width={50}
+                    />
+                    <YAxis 
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#9ca3af"
+                      style={{ fontSize: '11px' }}
+                      width={35}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="volume" 
+                      stroke="#3B82F6" 
+                      strokeWidth={2}
+                      fillOpacity={1} 
+                      fill="url(#colorVolume)"
+                      name="Volume (kg)"
+                    />
+                    <Bar 
+                      yAxisId="right"
+                      dataKey="sets" 
+                      fill="#8B5CF6" 
+                      radius={[4, 4, 0, 0]}
+                      name="Sets"
+                    />
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             ) : (
@@ -692,4 +713,4 @@ export default function ExerciseDetailPage() {
       </div>
     </div>
   );
-} 
+}

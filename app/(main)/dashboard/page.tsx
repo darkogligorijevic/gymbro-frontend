@@ -14,6 +14,8 @@ import {
   subMonths,
   startOfWeek,
   endOfWeek,
+  startOfDay,
+  subDays,
 } from "date-fns";
 import { Icons } from "@/components/Icons";
 import {
@@ -54,11 +56,11 @@ export default function DashboardPage() {
     return diff < 7 * 24 * 60 * 60 * 1000;
   }).length;
 
-  // Personal Records
+  // Personal Records with exercise ID
   const personalRecords = useMemo(() => {
     const prMap = new Map<
       string,
-      { weight: number; date: string; sessionId: string }
+      { weight: number; date: string; sessionId: string; exerciseId: string; exerciseName: string }
     >();
 
     workoutHistory.forEach((session) => {
@@ -83,31 +85,33 @@ export default function DashboardPage() {
               weight: w,
               date: session.clockIn,
               sessionId: session.id,
+              exerciseId: exercise.exerciseId,
+              exerciseName: exercise.exercise.name,
             });
           }
         });
       });
     });
 
-    return Array.from(prMap.entries())
-      .map(([name, data]) => ({ name, ...data }))
+    return Array.from(prMap.values())
       .sort((a, b) => b.weight - a.weight)
-      .slice(0, 3);
+      .slice(0, 5);
   }, [workoutHistory]);
 
-  // Most Frequent Exercises
+  // Most Frequent Exercises with exercise ID
   const mostFrequentExercises = useMemo(() => {
-    const exerciseCount = new Map<string, { count: number; name: string }>();
+    const exerciseCount = new Map<string, { count: number; name: string; exerciseId: string }>();
 
     workoutHistory.forEach((session) => {
       session.exercises.forEach((exercise) => {
         const name = exercise.exercise.name;
-        const current = exerciseCount.get(exercise.exerciseId);
+        const id = exercise.exerciseId;
+        const current = exerciseCount.get(id);
 
         if (current) {
           current.count++;
         } else {
-          exerciseCount.set(exercise.exerciseId, { count: 1, name });
+          exerciseCount.set(id, { count: 1, name, exerciseId: id });
         }
       });
     });
@@ -161,6 +165,35 @@ export default function DashboardPage() {
     return weeks;
   }, [workoutHistory]);
 
+  // Daily Activity (Last 30 days)
+  const dailyActivity = useMemo(() => {
+    const days = [];
+    const now = new Date();
+    
+    for (let i = 29; i >= 0; i--) {
+      const day = startOfDay(subDays(now, i));
+      const dayWorkouts = workoutHistory.filter(w => 
+        isSameDay(new Date(w.clockIn), day)
+      );
+      
+      const totalVolume = dayWorkouts.reduce((sum, workout) => {
+        return sum + workout.exercises.reduce((exSum, ex) => {
+          return exSum + ex.sets.reduce((setSum, set) => {
+            return setSum + (set.actualWeight || 0) * (set.actualReps || 0);
+          }, 0);
+        }, 0);
+      }, 0);
+
+      days.push({
+        date: format(day, "MMM dd"),
+        volume: Math.round(totalVolume),
+        workouts: dayWorkouts.length,
+      });
+    }
+    
+    return days;
+  }, [workoutHistory]);
+
   // Muscle Group Distribution
   const muscleGroupData = useMemo(() => {
     const muscleGroups = new Map<string, number>();
@@ -173,8 +206,59 @@ export default function DashboardPage() {
     });
 
     return Array.from(muscleGroups.entries())
-      .map(([name, value]) => ({ name: name.replace('_', ' ').toUpperCase(), value }))
+      .map(([name, value]) => ({ 
+        name: name.replace('_', ' ').charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+        value 
+      }))
       .sort((a, b) => b.value - a.value);
+  }, [workoutHistory]);
+
+  // Workout Intensity Analysis
+  const intensityData = useMemo(() => {
+    const last10Workouts = workoutHistory.slice(0, 10).reverse();
+    
+    return last10Workouts.map((workout, index) => {
+      const totalSets = workout.exercises.reduce((sum, ex) => 
+        sum + ex.sets.filter(s => s.isCompleted).length, 0
+      );
+      
+      const totalVolume = workout.exercises.reduce((sum, ex) => 
+        sum + ex.sets.reduce((setSum, set) => 
+          setSum + (set.actualWeight || 0) * (set.actualReps || 0), 0
+        ), 0
+      );
+      
+      const avgWeightPerSet = totalSets > 0 ? totalVolume / totalSets : 0;
+      
+      return {
+        workout: `W${index + 1}`,
+        sets: totalSets,
+        avgWeight: Math.round(avgWeightPerSet),
+        volume: Math.round(totalVolume / 1000), // Convert to tons
+        date: format(new Date(workout.clockIn), "MMM dd"),
+      };
+    });
+  }, [workoutHistory]);
+
+  // Workout Consistency (Days with workouts)
+  const consistencyData = useMemo(() => {
+    const last7Days = [];
+    const now = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const day = startOfDay(subDays(now, i));
+      const hasWorkout = workoutHistory.some(w => 
+        isSameDay(new Date(w.clockIn), day)
+      );
+      
+      last7Days.push({
+        day: format(day, "EEE"),
+        active: hasWorkout ? 1 : 0,
+        fullDate: format(day, "MMM dd"),
+      });
+    }
+    
+    return last7Days;
   }, [workoutHistory]);
 
   // Calendar Data
@@ -233,7 +317,7 @@ export default function DashboardPage() {
 
   const COLORS = ['#FF6B35', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
 
-  // Custom Tooltip for Charts
+  // Custom Tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -241,7 +325,7 @@ export default function DashboardPage() {
           <p className="text-white font-bold mb-1">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.value.toLocaleString()}
+              {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
             </p>
           ))}
         </div>
@@ -329,83 +413,167 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Weekly Progress - Enhanced with Multiple Charts */}
+      {/* 30-Day Activity Heatmap */}
       <div className="card">
         <div className="flex items-center gap-3 mb-6">
-          <Icons.Target className="w-8 h-8 text-primary-500" />
-          <h2 className="text-2xl font-bold text-white">Weekly Progress</h2>
+          <Icons.Calendar className="w-8 h-8 text-primary-500" />
+          <h2 className="text-2xl font-bold text-white">30-Day Activity</h2>
         </div>
+        <div className="w-full h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={dailyActivity}>
+              <defs>
+                <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#FF6B35" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#FF6B35" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis 
+                dataKey="date" 
+                stroke="#9ca3af"
+                style={{ fontSize: '11px' }}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                stroke="#9ca3af"
+                style={{ fontSize: '11px' }}
+                width={40}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area 
+                type="monotone" 
+                dataKey="volume" 
+                stroke="#FF6B35" 
+                strokeWidth={2}
+                fillOpacity={1} 
+                fill="url(#colorActivity)"
+                name="Volume (kg)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-        {/* Volume & Workouts Line Chart */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-white mb-4">Volume & Workout Frequency</h3>
+      {/* Workout Intensity & Consistency */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Intensity Analysis */}
+        <div className="card">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <Icons.Lightning className="w-7 h-7 text-primary-500" />
+            Workout Intensity
+          </h2>
           <div className="w-full h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={weeklyWorkouts}>
+              <BarChart data={intensityData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis 
-                  dataKey="week" 
+                  dataKey="workout" 
                   stroke="#9ca3af"
-                  style={{ fontSize: '12px' }}
+                  style={{ fontSize: '11px' }}
                 />
                 <YAxis 
-                  yAxisId="left"
                   stroke="#9ca3af"
-                  style={{ fontSize: '12px' }}
-                  label={{ value: 'Volume (kg)', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
-                />
-                <YAxis 
-                  yAxisId="right"
-                  orientation="right"
-                  stroke="#9ca3af"
-                  style={{ fontSize: '12px' }}
-                  label={{ value: 'Workouts', angle: 90, position: 'insideRight', fill: '#9ca3af' }}
+                  style={{ fontSize: '11px' }}
+                  width={40}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  yAxisId="left"
-                  type="monotone" 
-                  dataKey="volume" 
-                  stroke="#FF6B35" 
-                  strokeWidth={3}
-                  name="Volume"
-                  dot={{ fill: '#FF6B35', r: 5 }}
-                />
-                <Line 
-                  yAxisId="right"
-                  type="monotone" 
-                  dataKey="workouts" 
-                  stroke="#3B82F6" 
-                  strokeWidth={3}
-                  name="Workouts"
-                  dot={{ fill: '#3B82F6', r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Sets Completed Bar Chart */}
-        <div>
-          <h3 className="text-lg font-semibold text-white mb-4">Sets Completed</h3>
-          <div className="w-full h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyWorkouts}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="week" 
-                  stroke="#9ca3af"
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis 
-                  stroke="#9ca3af"
-                  style={{ fontSize: '12px' }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="sets" fill="#10B981" radius={[8, 8, 0, 0]} name="Sets" />
+                <Bar dataKey="sets" fill="#3B82F6" radius={[8, 8, 0, 0]} name="Sets" />
+                <Bar dataKey="volume" fill="#FF6B35" radius={[8, 8, 0, 0]} name="Volume (tons)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+
+        {/* Weekly Consistency */}
+        <div className="card">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <Icons.Fire className="w-7 h-7 text-primary-500" />
+            7-Day Consistency
+          </h2>
+          <div className="w-full h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={consistencyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  dataKey="day" 
+                  stroke="#9ca3af"
+                  style={{ fontSize: '12px' }}
+                />
+                <YAxis 
+                  stroke="#9ca3af"
+                  style={{ fontSize: '11px' }}
+                  width={40}
+                  domain={[0, 1]}
+                  ticks={[0, 1]}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar 
+                  dataKey="active" 
+                  fill="#10B981" 
+                  radius={[8, 8, 0, 0]} 
+                  name="Workout Done"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-gray-400 text-sm">
+              {consistencyData.filter(d => d.active === 1).length} of 7 days active this week
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Weekly Progress */}
+      <div className="card">
+        <div className="flex items-center gap-3 mb-6">
+          <Icons.Target className="w-8 h-8 text-primary-500" />
+          <h2 className="text-2xl font-bold text-white">8-Week Progress</h2>
+        </div>
+        <div className="w-full h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={weeklyWorkouts}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis 
+                dataKey="week" 
+                stroke="#9ca3af"
+                style={{ fontSize: '11px' }}
+              />
+              <YAxis 
+                yAxisId="left"
+                stroke="#9ca3af"
+                style={{ fontSize: '11px' }}
+                width={50}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                stroke="#9ca3af"
+                style={{ fontSize: '11px' }}
+                width={40}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="volume" 
+                stroke="#FF6B35" 
+                strokeWidth={3}
+                name="Volume (kg)"
+                dot={{ fill: '#FF6B35', r: 4 }}
+              />
+              <Line 
+                yAxisId="right"
+                type="monotone" 
+                dataKey="sets" 
+                stroke="#10B981" 
+                strokeWidth={3}
+                name="Sets"
+                dot={{ fill: '#10B981', r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -489,15 +657,15 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {personalRecords.map((pr, idx) => (
-                <div
-                  key={pr.name}
-                  onClick={() => router.push(`/workouts/${pr.sessionId}`)}
-                  className="bg-dark-300 hover:bg-dark-200 p-4 rounded-xl transition-all cursor-pointer group"
+                <Link
+                  key={pr.exerciseId}
+                  href={`/exercises/${pr.exerciseId}`}
+                  className="bg-dark-300 hover:bg-dark-200 p-4 rounded-xl transition-all cursor-pointer group block"
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-white font-bold text-lg group-hover:text-primary-500 transition-colors">
-                        {pr.name}
+                        {pr.exerciseName}
                       </h3>
                       <p className="text-gray-400 text-sm mt-1">
                         {format(new Date(pr.date), "MMM dd, yyyy")}
@@ -515,7 +683,7 @@ export default function DashboardPage() {
                       TOP PR
                     </div>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -535,13 +703,17 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {mostFrequentExercises.map((exercise, idx) => (
-                <div key={exercise.name} className="bg-dark-300 p-4 rounded-xl">
+                <Link
+                  key={exercise.exerciseId}
+                  href={`/exercises/${exercise.exerciseId}`}
+                  className="bg-dark-300 hover:bg-dark-200 p-4 rounded-xl transition-all cursor-pointer group block"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center font-bold text-primary-500">
                         {idx + 1}
                       </div>
-                      <span className="text-white font-semibold">
+                      <span className="text-white font-semibold group-hover:text-primary-500 transition-colors">
                         {exercise.name}
                       </span>
                     </div>
@@ -552,7 +724,7 @@ export default function DashboardPage() {
                       <div className="text-gray-400 text-xs">sessions</div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
