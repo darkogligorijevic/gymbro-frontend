@@ -297,7 +297,7 @@ export default function WorkoutPage() {
                   </div>
                   <div>
                     <div className="text-sm text-gray-400 uppercase tracking-wider font-semibold">Current Exercise</div>
-                    <h3 className="text-3xl font-bold text-white">
+                    <h3 className="text-xl md:text-2xl font-bold text-white">
                       {currentExercise?.exercise?.name || 'Exercise'}
                     </h3>
                   </div>
