@@ -112,7 +112,11 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (deleteConfirmText !== 'DELETE') {
       toast.error('Please type DELETE to confirm');
       return;
@@ -128,24 +132,12 @@ export default function SettingsPage() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to delete account');
       setIsLoading(false);
+      setShowDeleteConfirm(false);
     }
   };
 
   return (
     <div className="mx-auto space-y-8">
-      <Modal
-        isOpen={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false);
-          setDeleteConfirmText('');
-        }}
-        onConfirm={handleDeleteAccount}
-        title="⚠️ Delete Account"
-        message={`Are you absolutely sure? This action cannot be undone.\n\nPlease type DELETE to confirm.`}
-        confirmText="Yes, Delete My Account"
-        cancelText="Cancel"
-        type="danger"
-      />
 
       {/* Header */}
       <div>
@@ -320,32 +312,71 @@ export default function SettingsPage() {
           <p className="text-gray-400 mb-4">
             Once you delete your account, there is no going back. This action will permanently delete your account, including all your workouts, templates, and personal data.
           </p>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="w-full md:w-auto bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all"
-          >
-            Delete Account
-          </button>
+          
+          {!showDeleteConfirm ? (
+            <button
+              onClick={handleDeleteClick}
+              className="w-full md:w-auto bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all"
+            >
+              Delete Account
+            </button>
+          ) : (
+            <div className="space-y-4 p-6 bg-dark-400 rounded-xl border-2 border-red-500/50">
+              <div className="flex items-center gap-3 mb-4">
+                <Icons.AlertCircle className="w-8 h-8 text-red-500 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-bold text-lg">
+                    ⚠️ Final Warning!
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    This action is permanent and cannot be undone.
+                  </p>
+                </div>
+              </div>
+              
+              <p className="text-gray-300">
+                Type <span className="text-red-500 font-bold bg-red-500/10 px-2 py-1 rounded">DELETE</span> below to confirm account deletion:
+              </p>
+              
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                className="input-field border-red-500/50 focus:border-red-500"
+                placeholder="Type DELETE here"
+                autoFocus
+              />
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteConfirmText('');
+                  }}
+                  className="flex-1 btn-secondary"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  disabled={deleteConfirmText !== 'DELETE' || isLoading}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline mr-2"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Confirm Delete'
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-
-        {showDeleteConfirm && (
-          <div className="mt-6 space-y-4 p-4 bg-dark-400 rounded-xl border-2 border-red-500/50">
-            <p className="text-white font-semibold">
-              Are you absolutely sure? This action cannot be undone.
-            </p>
-            <p className="text-gray-400">
-              Please type <span className="text-red-500 font-bold">DELETE</span> to confirm.
-            </p>
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              className="input-field border-red-500/50"
-              placeholder="Type DELETE to confirm"
-            />
-          </div>
-        )}
       </div>
-    </div>
+      </div>
   );
 }

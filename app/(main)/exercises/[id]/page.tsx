@@ -5,6 +5,7 @@ import { useExercises } from "@/hooks/useExercises";
 import { useWorkout } from "@/hooks/useWorkout";
 import { Icons } from "@/components/Icons";
 import { MuscleGroup } from "@/lib/types";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> =
   {
@@ -187,6 +188,42 @@ export default function ExerciseDetailPage() {
     )
     .slice(0, 10);
 
+  // Prepare chart data
+  const chartData = recentWorkouts
+    .slice()
+    .reverse()
+    .map((session) => {
+      const exerciseInSession = session.exercises.find(
+        (ex) => ex.exerciseId === currentExercise.id
+      );
+      if (!exerciseInSession) return null;
+
+      const completedSets = exerciseInSession.sets.filter((s) => s.isCompleted);
+      if (completedSets.length === 0) return null;
+
+      const maxWeight = Math.max(...completedSets.map((s) => s.actualWeight || 0));
+      
+      return {
+        date: formatShortDate(session.clockIn),
+        weight: maxWeight,
+        fullDate: formatFullDate(session.clockIn),
+      };
+    })
+    .filter((d): d is { date: string; weight: number; fullDate: string } => d !== null && d.weight > 0);
+
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-dark-400 border border-primary-500 rounded-lg p-3 shadow-xl">
+          <p className="text-white font-bold text-lg">{payload[0].value} kg</p>
+          <p className="text-gray-400 text-sm">{payload[0].payload.fullDate}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-8">
       <button
@@ -315,81 +352,101 @@ export default function ExerciseDetailPage() {
               Volume Progression Chart
             </h2>
 
-            <div className="relative h-64 bg-dark-300 rounded-xl p-6 overflow-hidden">
-              <div className="absolute inset-0 flex items-end justify-between px-6 pb-6 gap-2">
-                <div className="h-[85%] w-full flex items-end justify-between gap-2">
-                  {(() => {
-                    const volumeData = recentWorkouts
-                      .slice()
-                      .reverse()
-                      .map((session) => {
-                        const exerciseInSession = session.exercises.find(
-                          (ex) => ex.exerciseId === currentExercise.id
-                        );
-                        if (!exerciseInSession) return null;
+            {(() => {
+              const volumeData = recentWorkouts
+                .slice()
+                .reverse()
+                .map((session) => {
+                  const exerciseInSession = session.exercises.find(
+                    (ex) => ex.exerciseId === currentExercise.id
+                  );
+                  if (!exerciseInSession) return null;
 
-                        const completedSets = exerciseInSession.sets.filter(
-                          (s) => s.isCompleted
-                        );
-                        const totalVolume = completedSets.reduce(
-                          (sum, set) =>
-                            sum +
-                            (Number(set.actualWeight) || 0) *
-                              (Number(set.actualReps) || 0),
-                          0
-                        );
+                  const completedSets = exerciseInSession.sets.filter(
+                    (s) => s.isCompleted
+                  );
+                  const totalVolume = completedSets.reduce(
+                    (sum, set) =>
+                      sum +
+                      (Number(set.actualWeight) || 0) *
+                        (Number(set.actualReps) || 0),
+                    0
+                  );
 
-                        return { session, totalVolume };
-                      })
-                      .filter(
-                        (d): d is { session: any; totalVolume: number } =>
-                          d !== null && d.totalVolume > 0
-                      );
+                  return {
+                    date: formatShortDate(session.clockIn),
+                    volume: totalVolume,
+                    fullDate: formatFullDate(session.clockIn),
+                  };
+                })
+                .filter(
+                  (d): d is { date: string; volume: number; fullDate: string } =>
+                    d !== null && d.volume > 0
+                );
 
-                    if (volumeData.length === 0) return null;
+              const CustomVolumeTooltip = ({ active, payload }: any) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="bg-dark-400 border border-primary-500 rounded-lg p-3 shadow-xl">
+                      <p className="text-white font-bold text-lg">{payload[0].value.toLocaleString()} kg</p>
+                      <p className="text-gray-400 text-sm">{payload[0].payload.fullDate}</p>
+                    </div>
+                  );
+                }
+                return null;
+              };
 
-                    const maxVolume = Math.max(
-                      ...volumeData.map((d) => d.totalVolume)
-                    );
+              if (volumeData.length === 0) {
+                return (
+                  <div className="text-center py-8 text-gray-400">
+                    Not enough data to display chart
+                  </div>
+                );
+              }
 
-                    return volumeData.map((data) => {
-                      const heightPercent = Math.max(
-                        (data.totalVolume / maxVolume) * 100,
-                        5
-                      );
-
-                      return (
-                        <div
-                          key={data.session.id}
-                          className="flex-1 flex flex-col items-center gap-2 group relative h-full"
-                        >
-                          <div className="w-full h-full flex items-end">
-                            <div
-                              className="relative w-full bg-gradient-to-t from-primary-600 to-orange-500 rounded-t-lg transition-all hover:from-primary-500 hover:to-orange-400"
-                              style={{ height: `${heightPercent}%` }}
-                            >
-                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-dark-400 px-2 py-1 rounded text-xs text-white whitespace-nowrap z-10">
-                                {data.totalVolume.toLocaleString()} kg
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1 truncate max-w-full">
-                            {formatShortDate(data.session.clockIn)}
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-center justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-gradient-to-r from-primary-600 to-orange-500"></div>
-                <span className="text-gray-400">Total Volume per Workout</span>
-              </div>
-            </div>
+              return (
+                <>
+                  <div className="w-full h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={volumeData}>
+                        <defs>
+                          <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#f97316" stopOpacity={0.1}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="#9ca3af"
+                          style={{ fontSize: '12px' }}
+                        />
+                        <YAxis 
+                          stroke="#9ca3af"
+                          style={{ fontSize: '12px' }}
+                          label={{ value: 'Volume (kg)', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                        />
+                        <Tooltip content={<CustomVolumeTooltip />} />
+                        <Area 
+                          type="monotone" 
+                          dataKey="volume" 
+                          stroke="#f97316" 
+                          strokeWidth={3}
+                          fillOpacity={1} 
+                          fill="url(#colorVolume)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 flex items-center justify-center gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-gradient-to-r from-primary-600 to-orange-500"></div>
+                      <span className="text-gray-400">Total Volume per Workout</span>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <div className="card">
@@ -398,150 +455,46 @@ export default function ExerciseDetailPage() {
               Max Weight Progression
             </h2>
 
-            <div className="relative h-64 bg-dark-300 rounded-xl p-6">
-              <div className="absolute inset-6">
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 1200 200"
-                  preserveAspectRatio="none"
-                  shapeRendering="geometricPrecision"
-                >
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <line
-                      key={i}
-                      x1="0"
-                      y1={i * 50}
-                      x2="1200"
-                      y2={i * 50}
-                      stroke="#374151"
-                      strokeWidth="1"
-                      strokeDasharray="4 4"
+            {chartData.length > 0 ? (
+              <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#9ca3af"
+                      style={{ fontSize: '12px' }}
                     />
-                  ))}
-
-                  {(() => {
-                    const dataPoints = recentWorkouts
-                      .slice()
-                      .reverse()
-                      .map((session) => {
-                        const exerciseInSession = session.exercises.find(
-                          (ex) => ex.exerciseId === currentExercise.id
-                        );
-                        if (!exerciseInSession) return null;
-
-                        const completedSets = exerciseInSession.sets.filter(
-                          (s) => s.isCompleted
-                        );
-                        if (completedSets.length === 0) return null;
-
-                        const maxWeight = Math.max(
-                          ...completedSets.map((s) => s.actualWeight || 0)
-                        );
-
-                        return { maxWeight, session };
-                      })
-                      .filter((d) => d !== null);
-
-                    if (dataPoints.length === 0) return null;
-
-                    const weights = dataPoints.map((d) => d.maxWeight);
-                    const maxOverall = Math.max(...weights);
-                    const minOverall = Math.min(...weights);
-                    const range = maxOverall - minOverall || 1;
-
-                    const points = dataPoints
-                      .map((d, i) => {
-                        const x =
-                          (i / Math.max(dataPoints.length - 1, 1)) * 500;
-                        const y =
-                          200 - ((d.maxWeight - minOverall) / range) * 160 - 20;
-                        return `${x},${y}`;
-                      })
-                      .join(" ");
-
-                    const lastX =
-                      ((dataPoints.length - 1) /
-                        Math.max(dataPoints.length - 1, 1)) *
-                      500;
-
-                    return (
-                      <>
-                        <polygon
-                          points={`0,200 ${points} ${lastX},200`}
-                          fill="url(#gradient)"
-                          opacity="0.3"
-                        />
-
-                        <polyline
-                          points={points}
-                          fill="none"
-                          stroke="url(#lineGradient)"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-
-                        {dataPoints.map((d, i) => {
-                          const x =
-                            (i / Math.max(dataPoints.length - 1, 1)) * 500;
-                          const y =
-                            200 -
-                            ((d.maxWeight - minOverall) / range) * 160 -
-                            20;
-                          return (
-                            <g key={i}>
-                              <circle
-                                cx={x}
-                                cy={y}
-                                r="5"
-                                fill="#f97316"
-                                stroke="#fff"
-                                strokeWidth="2"
-                              />
-                              <text
-                                x={x}
-                                y={y - 12}
-                                textAnchor="middle"
-                                fill="#fff"
-                                fontSize="12"
-                                fontWeight="bold"
-                              >
-                                {d.maxWeight}kg
-                              </text>
-                            </g>
-                          );
-                        })}
-                      </>
-                    );
-                  })()}
-
-                  <defs>
-                    <linearGradient
-                      id="gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="0%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="#f97316" stopOpacity="0.8" />
-                      <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
-                    </linearGradient>
-                    <linearGradient
-                      id="lineGradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="0%"
-                    >
-                      <stop offset="0%" stopColor="#f97316" />
-                      <stop offset="100%" stopColor="#fb923c" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                    <YAxis 
+                      stroke="#9ca3af"
+                      style={{ fontSize: '12px' }}
+                      label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area 
+                      type="monotone" 
+                      dataKey="weight" 
+                      stroke="#f97316" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorWeight)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                Not enough data to display chart
+              </div>
+            )}
 
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">
                   {stats.personalRecord.weight} kg
@@ -618,7 +571,7 @@ export default function ExerciseDetailPage() {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {completedSets.map((set) => (
                         <div
                           key={set.id}

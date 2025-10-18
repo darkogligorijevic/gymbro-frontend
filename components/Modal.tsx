@@ -66,12 +66,12 @@ export function Modal({
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fade-in">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Modal */}
-      <div className="relative bg-dark-300 rounded-2xl shadow-2xl border-2 border-dark-200 max-w-md w-full animate-scale-in">
+      <div className="relative bg-dark-300 rounded-2xl shadow-2xl border-2 border-dark-200 max-w-md w-full animate-scale-in max-h-[90vh] overflow-y-auto">
         <div className="p-6 sm:p-8">
           {/* Icon */}
           <div className="flex justify-center mb-4">
