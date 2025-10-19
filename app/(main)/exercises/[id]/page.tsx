@@ -6,6 +6,7 @@ import { useWorkout } from "@/hooks/useWorkout";
 import { Icons } from "@/components/Icons";
 import { MuscleGroup } from "@/lib/types";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, ComposedChart } from 'recharts';
+import { BicepsFlexed, Dumbbell } from "lucide-react";
 
 const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> =
   {
@@ -298,7 +299,7 @@ export default function ExerciseDetailPage() {
                   {config.label}
                 </div>
               </div>
-              <Icons.Dumbbell className="w-12 h-12 text-primary-500" />
+              <Dumbbell className="w-12 h-12 text-primary-500" />
             </div>
 
             <p className="text-gray-300 text-lg leading-relaxed">
@@ -655,7 +656,7 @@ export default function ExerciseDetailPage() {
           <div className="p-6 bg-dark-300 rounded-xl border border-dark-200">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-lg bg-dark-400 flex items-center justify-center">
-                <Icons.Dumbbell className="w-6 h-6 text-primary-500" />
+                <BicepsFlexed className="w-6 h-6 text-primary-500" />
               </div>
               <div>
                 <div className="text-sm text-gray-400">Secondary Muscles</div>

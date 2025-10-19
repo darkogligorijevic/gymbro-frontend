@@ -6,6 +6,7 @@ import { usersApi } from '@/lib/api';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
 import type { User } from '@/lib/types';
+import { Dumbbell, BicepsFlexed, Captions, LayoutDashboard } from 'lucide-react';
 
 export default function Header() {
   const router = useRouter();
@@ -107,13 +108,15 @@ export default function Header() {
   if (!isHydrated || !user) return null;
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: <Icons.Fire className="w-5 h-5" /> },
-    { href: '/exercises', label: 'Exercises', icon: <Icons.Dumbbell className="w-5 h-5" /> },
-    { href: '/templates', label: 'Templates', icon: <Icons.Target className="w-5 h-5" /> },
-    { href: '/workouts', label: 'Workouts', icon: <Icons.Lightning className="w-5 h-5" /> },
+    { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { href: '/exercises', label: 'Exercises', icon: <Dumbbell className="w-5 h-5" /> },
+    { href: '/templates', label: 'Templates', icon: <Captions className="w-5 h-5" /> },
+    { href: '/workouts', label: 'Workouts', icon: <BicepsFlexed className="w-5 h-5" /> },
   ];
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  console.log(searchResults)
 
   return (
     <nav className="glass border-b border-dark-200 sticky top-0 z-50 backdrop-blur-xl">

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { Icons } from '@/components/Icons';
+import { Dumbbell, Activity } from 'lucide-react'
 
 export default function HomePage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: <Icons.Dumbbell className="w-12 h-12" />,
+      icon: <Dumbbell className="w-12 h-12" />,
       title: "Track Your Lifts",
       description: "Log every rep, set, and weight with precision"
     },
@@ -32,7 +33,7 @@ export default function HomePage() {
       description: "Monitor progress and crush your goals"
     },
     {
-      icon: <Icons.Trophy className="w-12 h-12" />,
+      icon: <Activity className="w-12 h-12" />,
       title: "Track Progress",
       description: "Visualize your strength gains over time"
     }
@@ -56,7 +57,8 @@ export default function HomePage() {
               <Link href="/login" className="hidden sm:block btn-secondary">
                 Login
               </Link>
-              <Link href="/register" className="btn-primary">
+              {/* Register */}
+              <Link href="/login" className="btn-primary">
                 Get Started
               </Link>
             </div>
@@ -80,7 +82,8 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Link href="/register" className="btn-primary text-lg py-4 px-8 group">
+              {/* Register */}
+              <Link href="/login" className="btn-primary text-lg py-4 px-8 group">
                 Start Training Free
                 <Icons.ArrowRight className="w-5 h-5 inline ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -137,7 +140,8 @@ export default function HomePage() {
             <p className="text-white/90 text-lg mb-8">
               Join thousands of athletes tracking their progress
             </p>
-            <Link href="/register" className="inline-block bg-white text-primary-600 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105">
+            {/* Register */}
+            <Link href="/login" className="inline-block bg-white text-primary-600 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105">
               Create Free Account
             </Link>
           </div>

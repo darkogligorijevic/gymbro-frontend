@@ -34,6 +34,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { BicepsFlexed, Captions, Flame } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -283,7 +284,7 @@ export default function DashboardPage() {
     {
       label: "Total Workouts",
       value: workoutHistory.length,
-      icon: Icons.Trophy,
+      icon: BicepsFlexed,
       color: "from-primary-500 to-orange-500",
       bgColor: "bg-primary-500/10",
       iconColor: "text-primary-500",
@@ -292,7 +293,7 @@ export default function DashboardPage() {
     {
       label: "Templates",
       value: templates.length,
-      icon: Icons.Target,
+      icon: Captions,
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-500/10",
       iconColor: "text-blue-500",
@@ -301,7 +302,7 @@ export default function DashboardPage() {
     {
       label: "This Week",
       value: thisWeekWorkouts,
-      icon: Icons.Fire,
+      icon: Flame,
       color: "from-purple-500 to-pink-500",
       bgColor: "bg-purple-500/10",
       iconColor: "text-purple-500",
@@ -341,7 +342,7 @@ export default function DashboardPage() {
         <div className="absolute inset-0 bg-gym-pattern opacity-10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <Icons.Fire className="w-10 h-10 text-white animate-bounce-slow" />
+            <Flame className="w-10 h-10 text-white animate-bounce-slow" />
             <h1 className="text-3xl md:text-5xl font-bold text-white text-shadow">
               Welcome, {user?.firstName || user?.username}!
             </h1>

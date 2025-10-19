@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useExercises } from '@/hooks/useExercises';
 import { MuscleGroup } from '@/lib/types';
 import { Icons } from '@/components/Icons';
+import { Dumbbell } from 'lucide-react';
 
 const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> = {
   [MuscleGroup.CHEST]: { label: 'Chest', color: 'from-red-500 to-pink-500' },
@@ -77,7 +78,7 @@ export default function ExercisesPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-              <Icons.Dumbbell className="w-10 h-10 text-primary-500" />
+              <Dumbbell className="w-10 h-10 text-primary-500" />
               {isSelectionMode ? 'Select Exercises' : 'Exercise Library'}
             </h1>
             <p className="text-gray-400 text-lg">
