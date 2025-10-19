@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { Icons } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/hooks/useToast';
+import { ArrowRight, Calendar, Check, Clock, Flame, Target, Zap } from 'lucide-react';
 
 export default function WorkoutPage() {
   const router = useRouter();
@@ -212,7 +212,7 @@ export default function WorkoutPage() {
       />
 
       <h1 className="text-3xl md:text-5xl font-bold text-white flex items-center gap-3">
-        <Icons.Lightning className="w-10 h-10 text-primary-500" />
+        <Zap className="w-10 h-10 text-primary-500" />
         Workout Session
       </h1>
 
@@ -239,11 +239,11 @@ export default function WorkoutPage() {
                   
                   <div className="flex flex-wrap items-center gap-4 text-white/90">
                     <div className="flex items-center gap-2">
-                      <Icons.Clock className="w-5 h-5" />
+                      <Clock className="w-5 h-5" />
                       <span>Started {format(new Date(activeWorkout.clockIn), 'h:mm a')}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Icons.Target className="w-5 h-5" />
+                      <Target className="w-5 h-5" />
                       <span>{completedExercises}/{totalExercises} exercises</span>
                     </div>
                   </div>
@@ -293,7 +293,7 @@ export default function WorkoutPage() {
               <div className="flex items-center justify-between gap-3 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary-500 p-3 rounded-xl">
-                    <Icons.Fire className="w-6 h-6 text-white" />
+                    <Flame className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <div className="text-sm text-gray-400 uppercase tracking-wider font-semibold">Current Exercise</div>
@@ -393,7 +393,7 @@ export default function WorkoutPage() {
                             disabled={isLoading}
                             className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 disabled:opacity-50"
                           >
-                            <Icons.Check className="w-5 h-5" />
+                            <Check className="w-5 h-5" />
                           </button>
                         </div>
                       ) : (
@@ -407,7 +407,7 @@ export default function WorkoutPage() {
                             <div className="text-2xl">{set.actualReps}</div>
                             <div className="text-xs text-gray-400">reps</div>
                           </div>
-                          <Icons.Check className="w-6 h-6" />
+                          <Check className="w-6 h-6" />
                         </div>
                       )}
                     </div>
@@ -420,7 +420,7 @@ export default function WorkoutPage() {
           {/* All Exercises Overview */}
           <div>
             <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              <Icons.Target className="w-6 h-6 text-primary-500" />
+              <Target className="w-6 h-6 text-primary-500" />
               Exercise List
             </h3>
             
@@ -446,7 +446,7 @@ export default function WorkoutPage() {
                         isSkipped ? 'bg-yellow-500 text-white' :
                         'bg-dark-200 text-gray-400'
                       }`}>
-                        {isFinished ? <Icons.Check className="w-6 h-6" /> : 
+                        {isFinished ? <Check className="w-6 h-6" /> : 
                          isSkipped ? '⏸' : 
                          index + 1}
                       </div>
@@ -475,7 +475,7 @@ export default function WorkoutPage() {
                       <div className="flex gap-2">
                         {isFinished && (
                           <span className="badge bg-green-500/20 text-green-500 border border-green-500/30">
-                            <Icons.Check className="w-4 h-4 mr-1" />
+                            <Check className="w-4 h-4 mr-1" />
                             Done
                           </span>
                         )}
@@ -513,7 +513,7 @@ export default function WorkoutPage() {
         <div className="space-y-8">
           <div className="card text-center py-16">
             <div className="bg-primary-500/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Icons.Lightning className="w-12 h-12 text-primary-500" />
+              <Zap className="w-12 h-12 text-primary-500" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">No active workout</h3>
             <p className="text-gray-400 mb-6">Start a new workout to begin tracking</p>
@@ -529,7 +529,7 @@ export default function WorkoutPage() {
           {workoutHistory.length > 0 && (
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <Icons.Calendar className="w-5 h-5 md:w-6 md:h-6 text-primary-500" />
+                <Calendar className="w-5 h-5 md:w-6 md:h-6 text-primary-500" />
                 Recent History
               </h2>
               
@@ -547,7 +547,7 @@ export default function WorkoutPage() {
                     >
                       <div className="flex items-start gap-3 sm:items-center">
                         <div className="bg-green-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-green-500/20 transition-colors flex-shrink-0">
-                          <Icons.Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
+                          <Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
                         </div>
                         
                         <div className="flex-1 min-w-0">
@@ -556,11 +556,11 @@ export default function WorkoutPage() {
                           </h3>
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 mt-1">
                             <span className="flex items-center gap-1">
-                              <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                               {format(new Date(workout.clockIn), 'MMM dd, yyyy')}
                             </span>
                             <span className="flex items-center gap-1">
-                              <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                               {workout.durationMinutes} min
                             </span>
                           </div>
@@ -570,12 +570,12 @@ export default function WorkoutPage() {
                           {workout.isWorkoutFinished && (
                             <>
                               <div className="flex badge bg-green-500/10 text-green-500 border border-green-500/30">
-                                <Icons.Check className="w-4 h-4 mr-1" />
+                                <Check className="w-4 h-4 mr-1" />
                                 Completed
                               </div>
                             </>
                           )}
-                          <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
                     </div>

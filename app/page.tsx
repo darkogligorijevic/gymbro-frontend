@@ -3,8 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
-import { Icons } from '@/components/Icons';
-import { Dumbbell, Activity } from 'lucide-react'
+import { Dumbbell, Activity, Target, Flame, Zap, ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,12 +22,12 @@ export default function HomePage() {
       description: "Log every rep, set, and weight with precision"
     },
     {
-      icon: <Icons.Target className="w-12 h-12" />,
+      icon: <Target className="w-12 h-12" />,
       title: "Custom Templates",
       description: "Create personalized workout routines"
     },
     {
-      icon: <Icons.Fire className="w-12 h-12" />,
+      icon: <Flame className="w-12 h-12" />,
       title: "Stay Motivated",
       description: "Monitor progress and crush your goals"
     },
@@ -50,14 +49,13 @@ export default function HomePage() {
         <nav className="container mx-auto px-6 py-8">
           <div className="flex justify-between items-center">
             <Link href={'/'} className="flex items-center gap-3">
-              <Icons.Lightning className="w-10 h-10 text-primary-500" />
+              
               <span className="text-3xl font-bold gradient-text">Gymbro</span>
             </Link>
             <div className="flex gap-4">
               <Link href="/login" className="hidden sm:block btn-secondary">
                 Login
               </Link>
-              {/* Register */}
               <Link href="/login" className="btn-primary">
                 Get Started
               </Link>
@@ -68,7 +66,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-20 text-center">
           <div className="max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-primary-500/10 border border-primary-500/30 rounded-full px-6 py-2 mb-8">
-              <Icons.Lightning className="w-5 h-5 text-primary-500" />
+              <Zap className="w-5 h-5 text-primary-500" />
               <span className="text-primary-400 font-semibold">Your Personal Fitness Companion</span>
             </div>
             
@@ -82,10 +80,9 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              {/* Register */}
               <Link href="/login" className="btn-primary text-lg py-4 px-8 group">
                 Start Training Free
-                <Icons.ArrowRight className="w-5 h-5 inline ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 inline ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/login" className="btn-secondary text-lg py-4 px-8">
                 Sign In
@@ -135,12 +132,11 @@ export default function HomePage() {
         {/* CTA Section */}
         <div className="container mx-auto px-6 py-20">
           <div className="card bg-gradient-to-r from-primary-600 to-primary-500 text-center max-w-4xl mx-auto">
-            <Icons.Fire className="w-16 h-16 text-white mx-auto mb-6 animate-bounce-slow" />
+            <Flame className="w-16 h-16 text-white mx-auto mb-6 animate-bounce-slow" />
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
             <p className="text-white/90 text-lg mb-8">
               Join thousands of athletes tracking their progress
             </p>
-            {/* Register */}
             <Link href="/login" className="inline-block bg-white text-primary-600 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105">
               Create Free Account
             </Link>

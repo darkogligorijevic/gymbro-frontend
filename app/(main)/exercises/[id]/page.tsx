@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkout } from "@/hooks/useWorkout";
-import { Icons } from "@/components/Icons";
 import { MuscleGroup } from "@/lib/types";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, ComposedChart } from 'recharts';
-import { BicepsFlexed, Dumbbell } from "lucide-react";
+import { AlertCircle, ArrowLeft, BicepsFlexed, Calendar, Check, Dumbbell, FileText, Flame, Target, Trophy, Zap } from "lucide-react";
 
 const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> =
   {
@@ -269,7 +268,7 @@ export default function ExerciseDetailPage() {
         onClick={() => router.back()}
         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
       >
-        <Icons.ArrowLeft className="w-5 h-5" />
+        <ArrowLeft className="w-5 h-5" />
         <span>Back</span>
       </button>
 
@@ -313,7 +312,7 @@ export default function ExerciseDetailPage() {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="card bg-gradient-to-br from-primary-600 to-orange-600 text-white">
           <div className="flex items-center justify-between mb-3">
-            <Icons.Trophy className="w-8 h-8" />
+            <Trophy className="w-8 h-8" />
             <span className="text-sm font-semibold opacity-90">
               Personal Record
             </span>
@@ -339,7 +338,7 @@ export default function ExerciseDetailPage() {
 
         <div className="card bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
           <div className="flex items-center justify-between mb-3">
-            <Icons.Target className="w-8 h-8" />
+            <Target className="w-8 h-8" />
             <span className="text-sm font-semibold opacity-90">
               Total Volume
             </span>
@@ -354,7 +353,7 @@ export default function ExerciseDetailPage() {
 
         <div className="card bg-gradient-to-br from-purple-600 to-pink-600 text-white">
           <div className="flex items-center justify-between mb-3">
-            <Icons.Calendar className="w-8 h-8" />
+            <Calendar className="w-8 h-8" />
             <span className="text-sm font-semibold opacity-90">Frequency</span>
           </div>
           <div className="text-3xl font-bold mb-1">{stats.timesUsed}x</div>
@@ -369,7 +368,7 @@ export default function ExerciseDetailPage() {
 
         <div className="card bg-gradient-to-br from-green-600 to-emerald-600 text-white">
           <div className="flex items-center justify-between mb-3">
-            <Icons.Lightning className="w-8 h-8" />
+            <Zap className="w-8 h-8" />
             <span className="text-sm font-semibold opacity-90">
               Avg Performance
             </span>
@@ -388,7 +387,7 @@ export default function ExerciseDetailPage() {
           {/* Strength Progress Chart */}
           <div className="card">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Icons.Trophy className="w-7 h-7 text-primary-500" />
+              <BicepsFlexed className="w-7 h-7 text-primary-500" />
               Strength Progress
             </h2>
             {progressData.length > 0 ? (
@@ -453,7 +452,7 @@ export default function ExerciseDetailPage() {
           {/* Volume & Sets Chart */}
           <div className="card">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Icons.Fire className="w-7 h-7 text-primary-500" />
+              <Flame className="w-7 h-7 text-primary-500" />
               Volume & Sets Progression
             </h2>
 
@@ -543,7 +542,7 @@ export default function ExerciseDetailPage() {
 
           <div className="card">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Icons.Calendar className="w-7 h-7 text-primary-500" />
+              <Calendar className="w-7 h-7 text-primary-500" />
               Recent Workout History
             </h2>
 
@@ -615,7 +614,7 @@ export default function ExerciseDetailPage() {
 
       {stats.totalSets === 0 && (
         <div className="card text-center py-12">
-          <Icons.AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400 text-lg">
             No workout history with this exercise yet.
           </p>
@@ -627,7 +626,7 @@ export default function ExerciseDetailPage() {
 
       <div className="card">
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          <Icons.Target className="w-7 h-7 text-primary-500" />
+          <Target className="w-7 h-7 text-primary-500" />
           Muscle Groups Targeted
         </h2>
 
@@ -638,7 +637,7 @@ export default function ExerciseDetailPage() {
               <div
                 className={`w-12 h-12 rounded-lg bg-gradient-to-r ${config.color} flex items-center justify-center`}
               >
-                <Icons.Fire className="w-6 h-6 text-white" />
+                <Flame className="w-6 h-6 text-white" />
               </div>
               <div>
                 <div className="text-sm text-gray-400">Primary Target</div>
@@ -691,14 +690,14 @@ export default function ExerciseDetailPage() {
 
       <div className="card">
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          <Icons.FileText className="w-7 h-7 text-primary-500" />
+          <FileText className="w-7 h-7 text-primary-500" />
           Exercise Tips
         </h2>
 
         <div className="space-y-4">
           <div className="flex gap-3">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-500/20 flex items-center justify-center">
-              <Icons.Check className="w-5 h-5 text-primary-500" />
+              <Check className="w-5 h-5 text-primary-500" />
             </div>
             <div>
               <h3 className="text-white font-semibold mb-1">

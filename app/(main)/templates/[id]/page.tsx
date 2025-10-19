@@ -5,9 +5,9 @@ import { useTemplates } from '@/hooks/useTemplates';
 import { useWorkout } from '@/hooks/useWorkout';
 import { workoutApi } from '@/lib/api';
 import Link from 'next/link';
-import { Icons } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/hooks/useToast';
+import { Clock, DiamondMinus, Dumbbell, Edit, Flame, Target, Zap } from 'lucide-react';
 
 export default function TemplateDetailPage() {
   const params = useParams();
@@ -86,7 +86,7 @@ export default function TemplateDetailPage() {
   if (!currentTemplate) {
     return (
       <div className="card text-center py-16">
-        <Icons.Target className="w-20 h-20 text-gray-600 mx-auto mb-4" />
+        <Target className="w-20 h-20 text-gray-600 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-white mb-2">Template not found</h3>
         <p className="text-gray-400 mb-6">This template doesn't exist or has been deleted</p>
         <Link href="/templates" className="btn-primary inline-block">
@@ -140,15 +140,15 @@ export default function TemplateDetailPage() {
           {/* Stats */}
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="flex items-center gap-2 bg-dark-300 px-4 py-2 rounded-xl">
-              <Icons.Dumbbell className="w-5 h-5 text-primary-500" />
+              <Dumbbell className="w-5 h-5 text-primary-500" />
               <span className="text-white font-semibold">{currentTemplate.exercises.length} exercises</span>
             </div>
             <div className="flex items-center gap-2 bg-dark-300 px-4 py-2 rounded-xl">
-              <Icons.Target className="w-5 h-5 text-blue-500" />
+              <Target className="w-5 h-5 text-blue-500" />
               <span className="text-white font-semibold">{totalSets} sets</span>
             </div>
             <div className="flex items-center gap-2 bg-dark-300 px-4 py-2 rounded-xl">
-              <Icons.Clock className="w-5 h-5 text-green-500" />
+              <Clock className="w-5 h-5 text-green-500" />
               <span className="text-white font-semibold">~{estimatedTime} min</span>
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function TemplateDetailPage() {
               </>
             ) : (
               <>
-                <Icons.Lightning className="w-5 h-5" />
+                <Zap className="w-5 h-5" />
                 Start Workout
               </>
             )}
@@ -178,7 +178,7 @@ export default function TemplateDetailPage() {
             href={`/templates/${currentTemplate.id}/edit`}
             className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all text-center"
           >
-            <Icons.Edit className="w-5 h-5 inline mr-2" />
+            <Edit className="w-5 h-5 inline mr-2" />
             Edit Template
           </Link>
 
@@ -195,7 +195,7 @@ export default function TemplateDetailPage() {
       {/* Exercises List */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Icons.Fire className="w-7 h-7 text-primary-500" />
+          <Flame className="w-7 h-7 text-primary-500" />
           Workout Plan
         </h2>
 

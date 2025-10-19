@@ -3,9 +3,9 @@ import { useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { usersApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { Icons } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/hooks/useToast';
+import { AlertCircle, Edit, Lock, Upload, User } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -148,7 +148,7 @@ export default function SettingsPage() {
       {/* Avatar Section */}
       <div className="card">
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          <Icons.User className="w-7 h-7 text-primary-500" />
+          <User className="w-7 h-7 text-primary-500" />
           Profile Picture
         </h2>
         
@@ -175,7 +175,7 @@ export default function SettingsPage() {
               disabled={isLoading}
               className="w-full md:w-auto btn-primary flex items-center gap-2"
             >
-              <Icons.Upload className="w-5 h-5" />
+              <Upload className="w-5 h-5" />
               {isLoading ? 'Uploading...' : 'Upload New Picture'}
             </button>
           </div>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
       {/* Profile Information */}
       <div className="card">
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          <Icons.Edit className="w-7 h-7 text-primary-500" />
+          <Edit className="w-7 h-7 text-primary-500" />
           Profile Information
         </h2>
         
@@ -250,7 +250,7 @@ export default function SettingsPage() {
       {/* Change Password */}
       <div className="card">
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          <Icons.Lock className="w-7 h-7 text-primary-500" />
+          <Lock className="w-7 h-7 text-primary-500" />
           Change Password
         </h2>
         
@@ -304,7 +304,7 @@ export default function SettingsPage() {
       {/* Danger Zone */}
       <div className="card border-red-500/30 bg-red-500/5">
         <h2 className="text-2xl font-bold text-red-500 mb-6 flex items-center gap-3">
-          <Icons.AlertCircle className="w-7 h-7" />
+          <AlertCircle className="w-7 h-7" />
           Danger Zone
         </h2>
         
@@ -323,7 +323,7 @@ export default function SettingsPage() {
           ) : (
             <div className="space-y-4 p-6 bg-dark-400 rounded-xl border-2 border-red-500/50">
               <div className="flex items-center gap-3 mb-4">
-                <Icons.AlertCircle className="w-8 h-8 text-red-500 flex-shrink-0" />
+                <AlertCircle className="w-8 h-8 text-red-500 flex-shrink-0" />
                 <div>
                   <p className="text-white font-bold text-lg">
                     ⚠️ Final Warning!

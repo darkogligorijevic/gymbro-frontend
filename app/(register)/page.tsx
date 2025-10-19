@@ -3,8 +3,8 @@
 // import { useRouter } from 'next/navigation';
 // import { useAuth } from '@/hooks/useAuth';
 // import Link from 'next/link';
-// import { Icons } from '@/components/Icons';
 // import { useToast } from '@/hooks/useToast';
+// import { Zap } from 'lucide-react';
 
 // export default function RegisterPage() {
 //   const router = useRouter();
@@ -55,7 +55,7 @@
 //         {/* Logo */}
 //         <div className="text-center mb-8">
 //           <Link href="/" className="inline-flex items-center gap-3 group">
-//             <Icons.Lightning className="w-12 h-12 text-primary-500 group-hover:rotate-12 transition-transform" />
+//             <Zap className="w-12 h-12 text-primary-500 group-hover:rotate-12 transition-transform" />
 //             <span className="text-3xl md:text-4xl font-bold gradient-text">Gymbro</span>
 //           </Link>
 //           <p className="text-gray-400 mt-2">Start your fitness journey today!</p>
@@ -172,7 +172,7 @@
 //                 </>
 //               ) : (
 //                 <>
-//                   <Icons.Lightning className="w-5 h-5 inline mr-2" />
+//                   <Zap className="w-5 h-5 inline mr-2" />
 //                   Create Account
 //                 </>
 //               )}

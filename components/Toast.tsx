@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { Icons } from './Icons';
+import { AlertCircle, Check, FileText } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -22,10 +22,10 @@ export function Toast({ id, type, message, duration = 5000, onClose }: ToastProp
   }, [id, duration, onClose]);
 
   const icons = {
-    success: <Icons.Check className="w-5 h-5" />,
-    error: <Icons.AlertCircle className="w-5 h-5" />,
-    warning: <Icons.AlertCircle className="w-5 h-5" />,
-    info: <Icons.FileText className="w-5 h-5" />,
+    success: <Check className="w-5 h-5" />,
+    error: <AlertCircle className="w-5 h-5" />,
+    warning: <AlertCircle className="w-5 h-5" />,
+    info: <FileText className="w-5 h-5" />,
   };
 
   const styles = {

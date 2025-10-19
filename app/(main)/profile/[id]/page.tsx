@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usersApi } from '@/lib/api';
-import { Icons } from '@/components/Icons';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, subMonths } from 'date-fns';
 import type { UserProfile } from '@/lib/types';
 import Link from 'next/link';
+import { AlertCircle, ArrowLeft, Calendar, Check, Dumbbell, Flame, Settings, Trophy, Zap } from 'lucide-react';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -56,7 +56,7 @@ export default function ProfilePage() {
   if (error || !profile) {
     return (
       <div className="card text-center py-12">
-        <Icons.AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+        <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">Profile Not Found</h2>
         <p className="text-gray-400 mb-6">{error || 'User does not exist'}</p>
         <button onClick={() => router.push('/dashboard')} className="btn-primary">
@@ -107,7 +107,7 @@ export default function ProfilePage() {
                 </h1>
                 {isOwnProfile && (
                   <Link href="/settings" className="text-gray-400 hover:text-primary-500 transition">
-                    <Icons.Settings className="w-6 h-6" />
+                    <Settings className="w-6 h-6" />
                   </Link>
                 )}
               </div>
@@ -130,7 +130,7 @@ export default function ProfilePage() {
       <div className="grid md:grid-cols-3 justify-center text-center gap-6">
         <div className="card-hover group">
           <div className="bg-primary-500/10 rounded-2xl p-4 mb-4 inline-block group-hover:scale-110 transition-transform">
-            <Icons.Trophy className="w-8 h-8 text-primary-500" />
+            <Dumbbell className="w-8 h-8 text-primary-500" />
           </div>
           <h3 className="text-gray-400 text-sm font-semibold mb-2">Total Workouts</h3>
           <p className="text-5xl font-bold text-white">{stats.totalWorkouts}</p>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
 
         <div className="card-hover group">
           <div className="bg-green-500/10 rounded-2xl p-4 mb-4 inline-block group-hover:scale-110 transition-transform">
-            <Icons.Check className="w-8 h-8 text-green-500" />
+            <Check className="w-8 h-8 text-green-500" />
           </div>
           <h3 className="text-gray-400 text-sm font-semibold mb-2">Completed</h3>
           <p className="text-5xl font-bold text-white">{stats.completedWorkouts}</p>
@@ -146,7 +146,7 @@ export default function ProfilePage() {
 
         <div className="card-hover group">
           <div className="bg-purple-500/10 rounded-2xl p-4 mb-4 inline-block group-hover:scale-110 transition-transform">
-            <Icons.Fire className="w-8 h-8 text-purple-500" />
+            <Flame className="w-8 h-8 text-purple-500" />
           </div>
           <h3 className="text-gray-400 text-sm font-semibold mb-2">This Week</h3>
           <p className="text-5xl font-bold text-white">{stats.thisWeekWorkouts}</p>
@@ -157,7 +157,7 @@ export default function ProfilePage() {
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Icons.Calendar className="w-8 h-8 text-primary-500" />
+            <Calendar className="w-8 h-8 text-primary-500" />
             <h2 className="text-sm md:text-2xl font-bold text-white">
               Activity Calendar
             </h2>
@@ -167,7 +167,7 @@ export default function ProfilePage() {
               onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
               className="pl-2 md:p-2 hover:bg-dark-300 rounded-lg transition"
             >
-              <Icons.ArrowLeft className="w-5 h-5 text-gray-400" />
+              <ArrowLeft className="w-5 h-5 text-gray-400" />
             </button>
             <span className="text-white text-sm md:text-xl font-semibold min-w-28 md:min-w-32 text-center">
               {format(selectedMonth, 'MMMM yyyy')}
@@ -256,7 +256,7 @@ export default function ProfilePage() {
       {stats.topPRs.length > 0 && (
         <div className="card">
           <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-            <Icons.Trophy className="w-8 h-8 text-primary-500" />
+            <Trophy className="w-8 h-8 text-primary-500" />
             Personal Records
           </h2>
           
@@ -288,7 +288,7 @@ export default function ProfilePage() {
       {stats.favoriteExercises.length > 0 && (
         <div className="card">
           <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-            <Icons.Dumbbell className="w-8 h-8 text-primary-500" />
+            <Dumbbell className="w-8 h-8 text-primary-500" />
             Favorite Exercises
           </h2>
           
@@ -300,7 +300,9 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center gap-4">
                   <div className="bg-primary-500/10 p-3 rounded-xl">
-                    <Icons.Dumbbell className="w-6 h-6 text-primary-500" />
+                    <div className="w-6 h-6 text-center text-primary-500">
+                      {idx + 1}  
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-white font-bold">{exercise.exerciseName}</h3>
@@ -322,7 +324,7 @@ export default function ProfilePage() {
       {/* Empty State for New Users */}
       {stats.totalWorkouts === 0 && (
         <div className="card text-center py-12 bg-gradient-to-br from-primary-600/10 to-purple-600/10">
-          <Icons.Fire className="w-20 h-20 text-primary-500 mx-auto mb-4" />
+          <Flame className="w-20 h-20 text-primary-500 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-white mb-2">
             {isOwnProfile ? 'Start Your Fitness Journey!' : `${user.username} hasn't started yet`}
           </h3>
@@ -333,7 +335,7 @@ export default function ProfilePage() {
           </p>
           {isOwnProfile && (
             <Link href="/templates" className="btn-primary inline-block">
-              <Icons.Lightning className="w-5 h-5 inline mr-2" />
+              <Zap className="w-5 h-5 inline mr-2" />
               Start First Workout
             </Link>
           )}

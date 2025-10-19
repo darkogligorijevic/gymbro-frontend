@@ -4,9 +4,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usersApi } from '@/lib/api';
 import Link from 'next/link';
-import { Icons } from '@/components/Icons';
 import type { User } from '@/lib/types';
-import { Dumbbell, BicepsFlexed, Captions, LayoutDashboard } from 'lucide-react';
+import { Dumbbell, ListChecks, LayoutDashboard, Search, ChevronDown, Menu, X, User as UserIcon, Settings, LogOut, PlayCircle } from 'lucide-react';
 
 export default function Header() {
   const router = useRouter();
@@ -110,24 +109,23 @@ export default function Header() {
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { href: '/exercises', label: 'Exercises', icon: <Dumbbell className="w-5 h-5" /> },
-    { href: '/templates', label: 'Templates', icon: <Captions className="w-5 h-5" /> },
-    { href: '/workouts', label: 'Workouts', icon: <BicepsFlexed className="w-5 h-5" /> },
+    { href: '/templates', label: 'Templates', icon: <ListChecks className="w-5 h-5" /> },
+    { href: '/workouts', label: 'Workouts', icon: <PlayCircle className="w-5 h-5" /> },
   ];
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  console.log(searchResults)
-
   return (
     <nav className="glass border-b border-dark-200 sticky top-0 z-50 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-16">
+          {/* Left side - Logo */}
           <div className="flex items-center space-x-8">
             <Link href="/dashboard" className="flex items-center gap-2 group">
-              <Icons.Dumbbell className="w-8 h-8 text-primary-500 group-hover:rotate-12 transition-transform" />
-              <span className="text-2xl font-bold gradient-text">Gymbro</span>
+              <span className="text-2xl md:text-3xl font-bold gradient-text">Gymbro</span>
             </Link>
 
+            {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -149,11 +147,12 @@ export default function Header() {
             </div>
           </div>
 
+          {/* Right side - Search & User Menu */}
           <div className="flex items-center space-x-4">
             {/* Desktop Search Bar */}
             <div className="hidden lg:block relative" ref={searchRef}>
               <div className="relative">
-                <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search users..."
@@ -225,13 +224,7 @@ export default function Header() {
                     {user.firstName || user.username}
                   </div>
                 </div>
-                <svg
-                  className={`w-4 h-4 text-gray-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z" />
-                </svg>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {userMenuOpen && (
@@ -245,7 +238,7 @@ export default function Header() {
                     className="flex items-center gap-3 px-4 py-3 hover:bg-dark-200 transition-colors"
                     role="menuitem"
                   >
-                    <Icons.User className="w-5 h-5 text-gray-300" />
+                    <UserIcon className="w-5 h-5 text-gray-300" />
                     <span className="text-white">My profile</span>
                   </Link>
                   <Link
@@ -254,7 +247,7 @@ export default function Header() {
                     className="flex items-center gap-3 px-4 py-3 hover:bg-dark-200 transition-colors"
                     role="menuitem"
                   >
-                    <Icons.Settings className="w-5 h-5 text-gray-300" />
+                    <Settings className="w-5 h-5 text-gray-300" />
                     <span className="text-white">Settings</span>
                   </Link>
                   <button
@@ -265,9 +258,7 @@ export default function Header() {
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition-colors text-red-400"
                     role="menuitem"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    <LogOut className="w-5 h-5" />
                     <span>Logout</span>
                   </button>
                 </div>
@@ -277,15 +268,10 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-gray-400 hover:text-white"
+              className="md:hidden p-2 text-gray-400 hover:text-white hover:bg-dark-300 rounded-lg transition-all"
+              aria-label="Toggle menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -295,10 +281,10 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-dark-200 bg-dark-400">
           <div className="px-4 py-4 space-y-2">
-            {/* Mobile Search - WITH FULL FUNCTIONALITY */}
+            {/* Mobile Search */}
             <div className="mb-4" ref={mobileSearchRef}>
               <div className="relative">
-                <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search users..."
@@ -353,6 +339,7 @@ export default function Header() {
               )}
             </div>
 
+            {/* Navigation Items */}
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -369,25 +356,29 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            {/* Profile Link */}
             <Link 
               href={`/profile/${user.id}`} 
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-dark-300 transition-all"
               role="menuitem"
             >
-              <Icons.User className="w-5 h-5" />
+              <UserIcon className="w-5 h-5" />
               <span className="font-medium">My profile</span>
             </Link>
 
+            {/* Settings Link */}
             <Link
               href="/settings"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-dark-300 transition-all"
             >
-              <Icons.Settings className="w-5 h-5" />
+              <Settings className="w-5 h-5" />
               <span className="font-medium">Settings</span>
             </Link>
 
+            {/* Logout Button */}
             <button
               onClick={() => {
                 logout();
@@ -395,9 +386,7 @@ export default function Header() {
               }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-all"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
+              <LogOut className="w-5 h-5" />
               <span className="font-medium">Logout</span>
             </button>
           </div>

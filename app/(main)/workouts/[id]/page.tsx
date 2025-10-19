@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { workoutApi } from '@/lib/api';
 import { WorkoutSession } from '@/lib/types';
 import { format } from 'date-fns';
-import { Icons } from '@/components/Icons';
+import { AlertCircle, ArrowLeft, Calendar, Check, ChevronDown, Clock, Dumbbell, FileText, Target, Trophy } from 'lucide-react';
 
 export default function WorkoutDetailPage() {
   const params = useParams();
@@ -65,7 +65,7 @@ export default function WorkoutDetailPage() {
   if (!workout) {
     return (
       <div className="card text-center py-16">
-        <Icons.AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+        <AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-white mb-2">Workout not found</h3>
         <button
           onClick={() => router.push('/workouts')}
@@ -91,10 +91,10 @@ export default function WorkoutDetailPage() {
           onClick={() => router.back()}
           className="bg-dark-300 hover:bg-dark-200 p-3 rounded-xl transition-all"
         >
-          <Icons.ArrowLeft className="w-6 h-6 text-white" />
+          <ArrowLeft className="w-6 h-6 text-white" />
         </button>
         <h1 className="text-2xl md:text-5xl font-bold text-white flex items-center gap-3">
-          <Icons.Calendar className="w-10 h-10 text-primary-500" />
+          <Calendar className="w-10 h-10 text-primary-500" />
           Workout Details
         </h1>
       </div>
@@ -106,11 +106,11 @@ export default function WorkoutDetailPage() {
           <div className="flex items-center gap-3 mb-4">
             {workout.isWorkoutFinished ? (
               <div className="bg-green-500 p-3 rounded-xl">
-                <Icons.Check className="w-5 h-5 md:w-8 md:h-8 text-white" />
+                <Check className="w-5 h-5 md:w-8 md:h-8 text-white" />
               </div>
             ) : (
               <div className="bg-white/20 p-3 rounded-xl">
-                <Icons.Clock className="w-5 h-5 md:w-8 md:h-8 text-white" />
+                <Clock className="w-5 h-5 md:w-8 md:h-8 text-white" />
               </div>
             )}
             <div>
@@ -127,7 +127,7 @@ export default function WorkoutDetailPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border-transparent">
               <div className="flex items-center gap-2 mb-2">
-                <Icons.Clock className="w-5 h-5 text-white/80" />
+                <Clock className="w-5 h-5 text-white/80" />
                 <span className="text-white/80 text-sm uppercase tracking-wider">Duration</span>
               </div>
               <p className="text-3xl font-bold text-white">
@@ -138,7 +138,7 @@ export default function WorkoutDetailPage() {
 
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border-transparent">
               <div className="flex items-center gap-2 mb-2">
-                <Icons.Target className="w-5 h-5 text-white/80" />
+                <Target className="w-5 h-5 text-white/80" />
                 <span className="text-white/80 text-sm uppercase tracking-wider">Exercises</span>
               </div>
               <p className="text-3xl font-bold text-white">{workout.exercises.length}</p>
@@ -146,7 +146,7 @@ export default function WorkoutDetailPage() {
 
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border-transparent">
               <div className="flex items-center gap-2 mb-2">
-                <Icons.Dumbbell className="w-5 h-5 text-white/80" />
+                <Dumbbell className="w-5 h-5 text-white/80" />
                 <span className="text-white/80 text-sm uppercase tracking-wider">Total Sets</span>
               </div>
               <p className="text-3xl font-bold text-white">{completedSetsTotal}</p>
@@ -154,7 +154,7 @@ export default function WorkoutDetailPage() {
 
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border-transparent">
               <div className="flex items-center gap-2 mb-2">
-                <Icons.Trophy className="w-5 h-5 text-white/80" />
+                <Trophy className="w-5 h-5 text-white/80" />
                 <span className="text-white/80 text-sm uppercase tracking-wider">Status</span>
               </div>
               <p className="text-lg font-bold text-white">
@@ -168,7 +168,7 @@ export default function WorkoutDetailPage() {
       {/* Exercises Accordion */}
       <div className="space-y-3">
         <h3 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
-          <Icons.Dumbbell className="w-6 h-6 text-primary-500" />
+          <Dumbbell className="w-6 h-6 text-primary-500" />
           Exercises Performed
         </h3>
 
@@ -196,7 +196,7 @@ export default function WorkoutDetailPage() {
                         : 'bg-primary-500/20 text-primary-500'
                     }`}>
                       {exercise.status === 'finished' ? (
-                        <Icons.Check className="w-4 h-4 md:w-6 md:h-6" />
+                        <Check className="w-4 h-4 md:w-6 md:h-6" />
                       ) : (
                         index + 1
                       )}
@@ -210,7 +210,7 @@ export default function WorkoutDetailPage() {
                         <span>{completedSets}/{totalExSets} sets completed</span>
                         {exercise.notes && (
                           <span className="flex items-center gap-1">
-                            <Icons.FileText className="w-4 h-4" />
+                            <FileText className="w-4 h-4" />
                             Notes
                           </span>
                         )}
@@ -229,11 +229,11 @@ export default function WorkoutDetailPage() {
                   <div className="flex items-center gap-3">
                     {exercise.status === 'finished' && (
                       <div className="badge bg-green-500/20 text-green-500 border border-green-500/30">
-                        <Icons.Check className="w-4 h-4 mr-1" />
+                        <Check className="w-4 h-4 mr-1" />
                         Completed
                       </div>
                     )}
-                    <Icons.ChevronDown
+                    <ChevronDown
                       className={`w-6 h-6 text-gray-400 transition-transform ${
                         isExpanded ? 'rotate-180' : ''
                       }`}
@@ -248,7 +248,7 @@ export default function WorkoutDetailPage() {
                   {exercise.notes && (
                     <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
                       <div className="flex items-start gap-2">
-                        <Icons.FileText className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <FileText className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                         <div>
                           <h5 className="text-blue-400 font-semibold mb-1">Notes</h5>
                           <p className="text-gray-300">{exercise.notes}</p>
@@ -315,7 +315,7 @@ export default function WorkoutDetailPage() {
                                   <div className="text-xs text-gray-400">reps (actual)</div>
                                 </div>
                               </div>
-                              <Icons.Check className="w-6 h-6 text-green-500" />
+                              <Check className="w-6 h-6 text-green-500" />
                             </div>
                           )}
 
@@ -341,7 +341,7 @@ export default function WorkoutDetailPage() {
           onClick={() => router.push('/workouts')}
           className="btn-secondary flex-1"
         >
-          <Icons.ArrowLeft className="w-5 h-5 inline mr-2" />
+          <ArrowLeft className="w-5 h-5 inline mr-2" />
           Back to Workouts
         </button>
         {workout.workoutTemplate && (
@@ -349,7 +349,7 @@ export default function WorkoutDetailPage() {
             onClick={() => router.push(`/templates/${workout.workoutTemplate?.id}`)}
             className="btn-primary flex-1"
           >
-            <Icons.Target className="w-5 h-5 inline mr-2" />
+            <Target className="w-5 h-5 inline mr-2" />
             View Template
           </button>
         )}

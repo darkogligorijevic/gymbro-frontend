@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useTemplates } from '@/hooks/useTemplates';
 import { workoutApi } from '@/lib/api';
 import Link from 'next/link';
-import { Icons } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/hooks/useToast';
+import { Dumbbell, Edit, Flame, Plus, Target, Trash } from 'lucide-react';
 
 export default function TemplatesPage() {
   const { templates, isLoading, fetchTemplates, deleteTemplate } = useTemplates();
@@ -86,13 +86,13 @@ export default function TemplatesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-            <Icons.Target className="w-10 h-10 text-primary-500" />
+            <Target className="w-10 h-10 text-primary-500" />
             Workout Templates
           </h1>
           <p className="text-gray-400 text-lg">Create and manage your workout routines</p>
         </div>
         <Link href="/templates/new" className="btn-primary whitespace-nowrap text-center">
-          <Icons.Plus className="w-5 h-5 inline mr-2" />
+          <Plus className="w-5 h-5 inline mr-2" />
           Create Template
         </Link>
       </div>
@@ -108,14 +108,14 @@ export default function TemplatesPage() {
         /* Empty State */
         <div className="card text-center py-16">
           <div className="bg-primary-500/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Icons.Target className="w-12 h-12 text-primary-500" />
+            <Target className="w-12 h-12 text-primary-500" />
           </div>
           <h3 className="text-2xl font-bold text-white mb-2">No templates yet</h3>
           <p className="text-gray-400 mb-6 max-w-md mx-auto">
             Create your first workout template to get started with structured training
           </p>
           <Link href="/templates/new" className="btn-primary inline-block">
-            <Icons.Plus className="w-5 h-5 inline mr-2" />
+            <Plus className="w-5 h-5 inline mr-2" />
             Create Your First Template
           </Link>
         </div>
@@ -123,7 +123,7 @@ export default function TemplatesPage() {
         /* Templates Grid */
         <>
           <div className="flex items-center gap-2 text-gray-400">
-            <Icons.Fire className="w-5 h-5" />
+            <Flame className="w-5 h-5" />
             <span>{templates.length} templates</span>
           </div>
 
@@ -141,7 +141,7 @@ export default function TemplatesPage() {
                       {template.name}
                     </h3>
                     <div className="bg-primary-500/10 p-2 rounded-lg flex-shrink-0 ml-2">
-                      <Icons.Dumbbell className="w-5 h-5 text-primary-500" />
+                      <Dumbbell className="w-5 h-5 text-primary-500" />
                     </div>
                   </div>
                   
@@ -152,7 +152,7 @@ export default function TemplatesPage() {
 
                   {/* Stats */}
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                    <Icons.Target className="w-4 h-4" />
+                    <Target className="w-4 h-4" />
                     <span>{template.exercises.length} exercises</span>
                     <span className="text-gray-600">•</span>
                     <span>
@@ -193,7 +193,7 @@ export default function TemplatesPage() {
                       className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-4 py-3 rounded-xl transition-all"
                       title="Edit template"
                     >
-                      <Icons.Edit className="w-5 h-5" />
+                      <Edit className="w-5 h-5" />
                     </Link>
                     <button
                       onClick={() => handleDeleteClick(template.id, template.name)}
@@ -204,7 +204,7 @@ export default function TemplatesPage() {
                       {deletingId === template.id ? (
                         <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
                       ) : (
-                        <Icons.Trash className="w-5 h-5" />
+                        <Trash className="w-5 h-5" />
                       )}
                     </button>
                   </div>

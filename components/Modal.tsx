@@ -1,6 +1,5 @@
 'use client';
 import { useEffect } from 'react';
-import { Icons } from './Icons';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -51,9 +50,9 @@ export function Modal({
   if (!isOpen) return null;
 
   const icons = {
-    danger: <Icons.AlertCircle className="w-12 h-12 text-red-500" />,
-    warning: <Icons.AlertCircle className="w-12 h-12 text-yellow-500" />,
-    info: <Icons.FileText className="w-12 h-12 text-blue-500" />,
+    danger: <AlertCircle className="w-12 h-12 text-red-500" />,
+    warning: <AlertCircle className="w-12 h-12 text-yellow-500" />,
+    info: <FileText className="w-12 h-12 text-blue-500" />,
   };
 
   const confirmButtonStyles = {
@@ -134,3 +133,4 @@ export function useModal() {
 }
 
 import { useState } from 'react';
+import { AlertCircle, FileText } from 'lucide-react';

@@ -3,9 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useExercises } from '@/hooks/useExercises';
-import { Icons } from '@/components/Icons';
 import Link from 'next/link';
 import { useToast } from '@/hooks/useToast';
+import { Check, Dumbbell, Plus, Target, Trash } from 'lucide-react';
 
 interface ExerciseForm {
   exerciseId: string;
@@ -182,7 +182,7 @@ export default function NewTemplatePage() {
         </Link>
         
         <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-          <Icons.Plus className="w-10 h-10 text-primary-500" />
+          <Plus className="w-10 h-10 text-primary-500" />
           Create Workout Template
         </h1>
         <p className="text-gray-400 text-lg">Design your perfect workout routine</p>
@@ -192,7 +192,7 @@ export default function NewTemplatePage() {
         {/* Basic Info */}
         <div className="card">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-            <Icons.Target className="w-6 h-6 text-primary-500" />
+            <Target className="w-6 h-6 text-primary-500" />
             Basic Information
           </h2>
           
@@ -230,7 +230,7 @@ export default function NewTemplatePage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Icons.Dumbbell className="w-6 h-6 text-primary-500" />
+              <Dumbbell className="w-6 h-6 text-primary-500" />
               Exercises
               {exercisesForms.length > 0 && (
                 <span className="text-gray-400 text-lg">({exercisesForms.length})</span>
@@ -242,7 +242,7 @@ export default function NewTemplatePage() {
                 onClick={handleBulkAddExercises}
                 className="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white px-4 py-2 rounded-xl font-semibold transition-all"
               >
-                <Icons.Plus className="w-5 h-5 inline mr-2" />
+                <Plus className="w-5 h-5 inline mr-2" />
                 Browse & Select
               </button>
               <button
@@ -250,7 +250,7 @@ export default function NewTemplatePage() {
                 onClick={addExercise}
                 className="btn-primary"
               >
-                <Icons.Plus className="w-5 h-5 inline mr-2" />
+                <Plus className="w-5 h-5 inline mr-2" />
                 Add Single Exercise
               </button>
             </div>
@@ -258,7 +258,7 @@ export default function NewTemplatePage() {
 
           {exercisesForms.length === 0 ? (
             <div className="card text-center py-12">
-              <Icons.Dumbbell className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <Dumbbell className="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400 mb-6">No exercises added yet</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
@@ -266,7 +266,7 @@ export default function NewTemplatePage() {
                   onClick={handleBulkAddExercises}
                   className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/50"
                 >
-                  <Icons.Target className="w-5 h-5 inline mr-2" />
+                  <Target className="w-5 h-5 inline mr-2" />
                   Browse & Select Multiple
                 </button>
                 <button
@@ -300,7 +300,7 @@ export default function NewTemplatePage() {
                         className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
                         title="Remove exercise"
                       >
-                        <Icons.Trash className="w-5 h-5" />
+                        <Trash className="w-5 h-5" />
                       </button>
                     </div>
 
@@ -349,7 +349,7 @@ export default function NewTemplatePage() {
                             onClick={() => addSet(exIndex)}
                             className="text-primary-500 hover:text-primary-400 font-semibold text-sm flex items-center gap-1"
                           >
-                            <Icons.Plus className="w-4 h-4" />
+                            <Plus className="w-4 h-4" />
                             Add Set
                           </button>
                         </div>
@@ -407,7 +407,7 @@ export default function NewTemplatePage() {
                                 className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
                                 disabled={exerciseForm.sets.length === 1}
                               >
-                                <Icons.Trash className="w-4 h-4" />
+                                <Trash className="w-4 h-4" />
                               </button>
                             </div>
                           ))}
@@ -423,7 +423,7 @@ export default function NewTemplatePage() {
                       className="bg-dark-300 hover:bg-primary-500 text-gray-400 hover:text-white p-2 rounded-full transition-all shadow-lg hover:shadow-primary-500/50 group"
                       title="Add exercise below"
                     >
-                      <Icons.Plus className="w-5 h-5" />
+                      <Plus className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
@@ -445,7 +445,7 @@ export default function NewTemplatePage() {
               </>
             ) : (
               <>
-                <Icons.Check className="w-5 h-5 inline mr-2" />
+                <Check className="w-5 h-5 inline mr-2" />
                 Create Template
               </>
             )}

@@ -17,7 +17,6 @@ import {
   startOfDay,
   subDays,
 } from "date-fns";
-import { Icons } from "@/components/Icons";
 import {
   BarChart,
   Bar,
@@ -34,7 +33,19 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { BicepsFlexed, Captions, Flame } from "lucide-react";
+import { 
+  Dumbbell, 
+  ListChecks, 
+  Flame, 
+  Zap, 
+  Trophy, 
+  Target, 
+  Calendar, 
+  Clock, 
+  Check, 
+  ArrowRight, 
+  ArrowLeft 
+} from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -284,7 +295,7 @@ export default function DashboardPage() {
     {
       label: "Total Workouts",
       value: workoutHistory.length,
-      icon: BicepsFlexed,
+      icon: Dumbbell,
       color: "from-primary-500 to-orange-500",
       bgColor: "bg-primary-500/10",
       iconColor: "text-primary-500",
@@ -293,7 +304,7 @@ export default function DashboardPage() {
     {
       label: "Templates",
       value: templates.length,
-      icon: Captions,
+      icon: ListChecks,
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-500/10",
       iconColor: "text-blue-500",
@@ -355,7 +366,7 @@ export default function DashboardPage() {
               href="/templates"
               className="inline-flex items-center text-center gap-2 bg-white text-primary-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg w-full md:w-auto"
             >
-              <Icons.Lightning className="w-5 h-5" />
+              <Zap className="w-5 h-5" />
               Start New Workout
             </Link>
           )}
@@ -417,7 +428,7 @@ export default function DashboardPage() {
       {/* 30-Day Activity Heatmap */}
       <div className="card">
         <div className="flex items-center gap-3 mb-6">
-          <Icons.Calendar className="w-8 h-8 text-primary-500" />
+          <Calendar className="w-8 h-8 text-primary-500" />
           <h2 className="text-2xl font-bold text-white">30-Day Activity</h2>
         </div>
         <div className="w-full h-64">
@@ -461,7 +472,7 @@ export default function DashboardPage() {
         {/* Intensity Analysis */}
         <div className="card">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <Icons.Lightning className="w-7 h-7 text-primary-500" />
+            <Zap className="w-7 h-7 text-primary-500" />
             Workout Intensity
           </h2>
           <div className="w-full h-80">
@@ -489,7 +500,7 @@ export default function DashboardPage() {
         {/* Weekly Consistency */}
         <div className="card">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <Icons.Fire className="w-7 h-7 text-primary-500" />
+            <Flame className="w-7 h-7 text-primary-500" />
             7-Day Consistency
           </h2>
           <div className="w-full h-80">
@@ -529,7 +540,7 @@ export default function DashboardPage() {
       {/* Weekly Progress */}
       <div className="card">
         <div className="flex items-center gap-3 mb-6">
-          <Icons.Target className="w-8 h-8 text-primary-500" />
+          <Target className="w-8 h-8 text-primary-500" />
           <h2 className="text-2xl font-bold text-white">8-Week Progress</h2>
         </div>
         <div className="w-full h-80">
@@ -583,7 +594,7 @@ export default function DashboardPage() {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="card">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Icons.Target className="w-7 h-7 text-primary-500" />
+              <Target className="w-7 h-7 text-primary-500" />
               Muscle Group Focus
             </h2>
             <div className="w-full h-80">
@@ -611,7 +622,7 @@ export default function DashboardPage() {
 
           <div className="card">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Icons.Dumbbell className="w-7 h-7 text-primary-500" />
+              <Dumbbell className="w-7 h-7 text-primary-500" />
               Muscle Group Breakdown
             </h2>
             <div className="space-y-3">
@@ -647,7 +658,7 @@ export default function DashboardPage() {
         {/* Personal Records */}
         <div className="card">
           <div className="flex items-center gap-3 mb-6">
-            <Icons.Trophy className="w-8 h-8 text-yellow-500" />
+            <Trophy className="w-8 h-8 text-yellow-500" />
             <h2 className="text-2xl font-bold text-white">Personal Records</h2>
           </div>
 
@@ -680,7 +691,7 @@ export default function DashboardPage() {
                   </div>
                   {idx === 0 && (
                     <div className="mt-2 inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-500 px-3 py-1 rounded-full text-xs font-bold">
-                      <Icons.Trophy className="w-3 h-3" />
+                      <Trophy className="w-3 h-3" />
                       TOP PR
                     </div>
                   )}
@@ -693,7 +704,7 @@ export default function DashboardPage() {
         {/* Most Frequent Exercises */}
         <div className="card">
           <div className="flex items-center gap-3 mb-6">
-            <Icons.Fire className="w-8 h-8 text-orange-500" />
+            <Flame className="w-8 h-8 text-orange-500" />
             <h2 className="text-2xl font-bold text-white">Most Frequent</h2>
           </div>
 
@@ -736,7 +747,7 @@ export default function DashboardPage() {
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Icons.Calendar className="w-8 h-8 text-primary-500" />
+            <Calendar className="w-8 h-8 text-primary-500" />
             <h2 className="text-sm md:text-2xl font-bold text-white">
               Activity Calendar
             </h2>
@@ -746,7 +757,7 @@ export default function DashboardPage() {
               onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
               className="pl-2 md:p-2 hover:bg-dark-300 rounded-lg transition"
             >
-              <Icons.ArrowLeft className="w-5 h-5 text-gray-400" />
+              <ArrowLeft className="w-5 h-5 text-gray-400" />
             </button>
             <span className="text-white text-sm md:text-xl font-semibold min-w-28 md:min-w-32 text-center">
               {format(selectedMonth, "MMMM yyyy")}
@@ -828,7 +839,7 @@ export default function DashboardPage() {
         <Link href="/templates" className="card-hover group">
           <div className="flex items-center gap-4">
             <div className="bg-primary-500/10 p-4 rounded-2xl group-hover:bg-primary-500/20 transition-colors">
-              <Icons.Target className="w-8 h-8 text-primary-500" />
+              <Target className="w-8 h-8 text-primary-500" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-white mb-1">
@@ -836,14 +847,14 @@ export default function DashboardPage() {
               </h3>
               <p className="text-gray-400">Start a structured workout</p>
             </div>
-            <Icons.ArrowRight className="w-6 h-6 text-gray-400 ml-auto group-hover:text-primary-500 group-hover:translate-x-2 transition-all" />
+            <ArrowRight className="w-6 h-6 text-gray-400 ml-auto group-hover:text-primary-500 group-hover:translate-x-2 transition-all" />
           </div>
         </Link>
 
         <Link href="/exercises" className="card-hover group">
           <div className="flex items-center gap-4">
             <div className="bg-blue-500/10 p-4 rounded-2xl group-hover:bg-blue-500/20 transition-colors">
-              <Icons.Dumbbell className="w-8 h-8 text-blue-500" />
+              <Dumbbell className="w-8 h-8 text-blue-500" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-white mb-1">
@@ -851,7 +862,7 @@ export default function DashboardPage() {
               </h3>
               <p className="text-gray-400">Explore all exercises</p>
             </div>
-            <Icons.ArrowRight className="w-6 h-6 text-gray-400 ml-auto group-hover:text-blue-500 group-hover:translate-x-2 transition-all" />
+            <ArrowRight className="w-6 h-6 text-gray-400 ml-auto group-hover:text-blue-500 group-hover:translate-x-2 transition-all" />
           </div>
         </Link>
       </div>
@@ -860,7 +871,7 @@ export default function DashboardPage() {
       <div>
         <div className="flex sm:flex-row justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
-            <Icons.Calendar className="w-6 h-6 md:w-8 md:h-8 text-primary-500" />
+            <Calendar className="w-6 h-6 md:w-8 md:h-8 text-primary-500" />
             Recent Workouts
           </h2>
           <Link
@@ -868,13 +879,13 @@ export default function DashboardPage() {
             className="text-primary-500 hover:text-primary-400 transition flex items-center gap-2 font-semibold text-sm self-start sm:self-auto"
           >
             View All
-            <Icons.ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+            <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
           </Link>
         </div>
 
         {workoutHistory.length === 0 ? (
           <div className="card text-center py-12">
-            <Icons.Dumbbell className="w-12 h-12 md:w-16 md:h-16 text-gray-600 mx-auto mb-4" />
+            <Dumbbell className="w-12 h-12 md:w-16 md:h-16 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 text-base md:text-lg mb-4">
               No workouts yet
             </p>
@@ -892,7 +903,7 @@ export default function DashboardPage() {
               >
                 <div className="flex items-start gap-3 sm:items-center">
                   <div className="bg-primary-500/10 p-2 sm:p-3 rounded-xl group-hover:bg-primary-500/20 transition-colors flex-shrink-0">
-                    <Icons.Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500" />
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -901,11 +912,11 @@ export default function DashboardPage() {
                     </h3>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
                       <span className="flex items-center gap-1">
-                        <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                         {format(new Date(workout.clockIn), "MMM dd")}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Icons.Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                         {workout.durationMinutes} min
                       </span>
                     </div>
@@ -914,16 +925,16 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {workout.isWorkoutFinished && (
                       <div className="hidden sm:flex badge sm:bg-green-500/10 sm:text-green-500 sm:border sm:border-green-500/30">
-                        <Icons.Check className="hidden w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        <Check className="hidden w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                         <span className="hidden sm:inline">Completed</span>
                       </div>
                     )}
                     {workout.isWorkoutFinished && (
                       <div className="sm:hidden w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-                        <Icons.Check className="w-4 h-4 text-green-500" />
+                        <Check className="w-4 h-4 text-green-500" />
                       </div>
                     )}
-                    <Icons.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                   </div>
                 </div>
               </div>
@@ -934,7 +945,7 @@ export default function DashboardPage() {
 
       {/* Motivational Quote */}
       <div className="card bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-500/30 text-center">
-        <Icons.Trophy className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+        <Trophy className="w-12 h-12 text-purple-500 mx-auto mb-4" />
         <p className="text-xl md:text-2xl font-bold text-white mb-2">
           "The only bad workout is the one that didn't happen."
         </p>

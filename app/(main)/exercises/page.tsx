@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useExercises } from '@/hooks/useExercises';
 import { MuscleGroup } from '@/lib/types';
-import { Icons } from '@/components/Icons';
-import { Dumbbell } from 'lucide-react';
+import { Check, Dumbbell, Target } from 'lucide-react';
 
 const muscleGroupConfig: Record<MuscleGroup, { label: string; color: string }> = {
   [MuscleGroup.CHEST]: { label: 'Chest', color: 'from-red-500 to-pink-500' },
@@ -126,7 +125,7 @@ export default function ExercisesPage() {
                 disabled={selectedExerciseIds.length === 0}
                 className="md:flex-none bg-white text-primary-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Icons.Check className="w-5 h-5 inline mr-2" />
+                <Check className="w-5 h-5 inline mr-2" />
                 Confirm Selection
               </button>
             </div>
@@ -166,7 +165,7 @@ export default function ExercisesPage() {
 
       {/* Results Count */}
       <div className="flex items-center gap-2 text-gray-400">
-        <Icons.Target className="w-5 h-5" />
+        <Target className="w-5 h-5" />
         <span>{filteredExercises.length} exercises found</span>
       </div>
 
@@ -180,7 +179,7 @@ export default function ExercisesPage() {
       ) : filteredExercises.length === 0 ? (
         /* Empty State */
         <div className="card text-center py-16">
-          <Icons.Dumbbell className="w-20 h-20 text-gray-600 mx-auto mb-4" />
+          <Dumbbell className="w-20 h-20 text-gray-600 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-white mb-2">No exercises found</h3>
           <p className="text-gray-400 mb-6">
             {searchQuery ? 'Try adjusting your search' : 'Add some exercises to get started'}
@@ -222,7 +221,7 @@ export default function ExercisesPage() {
                         : 'bg-dark-400 border-gray-600 group-hover:border-primary-500'
                     }`}>
                       {isSelected && (
-                        <Icons.Check className="w-5 h-5 text-white" />
+                        <Check className="w-5 h-5 text-white" />
                       )}
                     </div>
                   </div>
