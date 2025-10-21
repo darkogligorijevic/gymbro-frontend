@@ -406,7 +406,7 @@ export default function EditTemplatePage() {
                                       exIndex,
                                       setIndex,
                                       'targetWeight',
-                                      parseFloat(e.target.value) || 0
+                                      parseInt(e.target.value) || 0
                                     )
                                   }
                                   className="input-field py-2"
